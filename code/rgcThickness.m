@@ -66,6 +66,8 @@ amacrine.diameter.sizeMM = [];
 % Data from Silviera et al 1990, Figures 16 and 17
 parasol.density.supportMM.temporal = 1:1:22;
 parasol.density.countsMMSq.temporal = [21.5, 15.5, 9, 4.6, 3, 2.2, 1.7, 1.1, 0.7, 0.56, 0.4, 0.2, 0.1, nan, nan, nan, nan, nan, nan, nan, nan, nan];
+parasol.density.supportMM.nasal = 1:1:22;
+parasol.density.countsMMSq.nasal = [];
 
 % Parasol cell body sizes
 % Put comments here about where this info comes from
