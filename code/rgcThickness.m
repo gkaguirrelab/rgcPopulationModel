@@ -54,16 +54,16 @@ amacrine.density.supportMM.temporal = [0, 0.11, 0.23, 0.4, 0.65, 0.86, 1.45, 2.4
 amacrine.density.countsMMSq.temporal = [73, 124, 317, 542, 689, 813, 1052, 1112, 1159, 1187, 1146, 1069, 992, 942, 888, 848, 798, 767, 731, 699, 677, 650, 642, 652, 676];
 
 % Amacrine cell body sizes
-% Put comments here about where this info comes from
+% Data from Curcio & Allen 1990, Figure 3
+%frequency measurements??
 amacrine.diameter.supportMM = [];
 amacrine.diameter.sizeMM = [];
 
 
-
 %% Parasol RGCs
 % Avergae measured parasol cell densities *100 cells/square mm from six macaque retinas
-% Silveira, L. C. L., and V. H. Perry. "The topography of magnocellular projecting ganglion cells (M-ganglion cells) in the primate retina." 
-% Neuroscience 40.1 (1991): 217-237.
+% Silveira, L. C. L., and V. H. Perry. "The topography of magnocellular projecting ganglion cells (M-ganglion cells) 
+% in the primate retina." Neuroscience 40.1 (1991): 217-237.
 
 % Data from Silviera et al. 1991, Figures 16 and 17
 parasol.density.supportMM.temporal = 1:1:22;
@@ -76,7 +76,10 @@ parasol.density.supportMM.inferior = 1:1:22;
 parasol.density.countsMMSq.inferior = [18.2, 11, 7.25, 3.7, 2.7, 2.05, 1.7, 1.1, 0.95, 0.75, 0.53, 0.48, 0.25, 0.05, nan, nan, nan, nan, nan, nan, nan];
 
 % Parasol cell body sizes
-% Put comments here about where this info comes from
+% Data from Perry et al. 1984, Figure 6C
+
+% Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that project to the dorsal 
+% lateral geniculate nucleus in the macaque monkey." Neuroscience 12.4 (1984): 1101-1123.
 parasol.diameter.supportMM = [];
 parasol.diameter.sizeMM = [];
 
@@ -85,10 +88,10 @@ parasol.diameter.sizeMM = [];
 bistratified.density.supportMM.temporal = [];
 bistratified.density.countsMMSq.temporal = [];
 
-% Parasol cell body sizes
+% Bistratified cell body sizes
 % Put comments here about where this info comes from
 bistratified.diameter.supportMM = [];
-bistratified.diameter.sizeMM = [];
+bistratified.diameter.sizeMM = [.018];
 
 
 %% Midget RGCs
@@ -97,10 +100,15 @@ bistratified.diameter.sizeMM = [];
 midget.density.supportMM.temporal = [];
 midget.density.countsMMSq.temporal = [];
 
-% Parasol cell body sizes
-% Put comments here about where this info comes from
-midget.diameter.supportMM = [];
-midget.diameter.sizeMM = [];
+% Midget cell body sizes
+% This comes from Liu 2017, Figure 4B
+% support in degrees??
+
+% Liu, Zhuolin, et al. "Imaging and quantifying ganglion cells and other transparent neurons 
+% in the living human retina." Proceedings of the National Academy of Sciences (2017): 201711734.
+
+midget.diameter.supportMM = [1.5-3, 3-4.5, 6-7.5, 8-9.5, 12-13.5];
+midget.diameter.sizeMM = [.0115, .0113, .0114, .0118, .01315];
 
 
 % Calculate thickness
