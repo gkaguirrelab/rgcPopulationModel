@@ -37,5 +37,15 @@ p.parse(varargin{:})
 
 
 
+
+% Define cell proportions
+
+
+% Define cell sizes
+
+
+% Calculate thickness
+
+
 end % rgcThickness function
 
