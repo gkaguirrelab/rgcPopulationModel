@@ -90,7 +90,7 @@ bistratified.density.countsMMSq.temporal = [];
 
 % Bistratified cell body sizes
 % Put comments here about where this info comes from
-bistratified.diameter.supportMM = [];
+bistratified.diameter.supportMM = [nan];
 bistratified.diameter.sizeMM = [.018];
 
 
