@@ -41,16 +41,17 @@ fitRGCDensitySqMMRetina = @(posMMretina) fitRGCDensitySqDegRetina(convert_mmReti
 
 
 %% Displaced amacrine cells
-% Kara -- place here some text describing what we know about cell
-% denisities for displaced amacrine cells, and the citations.
+% Curcio & Allen 1990 distinguished displaced amacrine cells from retinal ganglion cells through imagin
+% and evalutating their morphology and determined their soma size and densities at eccentricities 
+% across the human retina. Amacrine cell densities are averages across four meridians.
 %
 %   Curcio, Christine A., and Kimberly A. Allen. "Topography of ganglion
 %   cells in human retina." Journal of comparative Neurology 300.1 (1990):
 %   5-25.
 
 % Data from Curcio & Allen 1990, Figure 10
-amacrine.density.supportMM.temporal = [];
-amacrine.density.countsMMSq.temporal = [];
+amacrine.density.supportMM.temporal = [0, 0.11, 0.23, 0.4, 0.65, 0.86, 1.45, 2.46, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.6, 12.6, 13.6, 14.6, 15.6, 16.6, 17.7, 18.65, 19.65];
+amacrine.density.countsMMSq.temporal = [73, 124, 317, 542, 689, 813, 1052, 1112, 1159, 1187, 1146, 1069, 992, 942, 888, 848, 798, 767, 731, 699, 677, 650, 642, 652, 676];
 
 % Amacrine cell body sizes
 % Put comments here about where this info comes from
@@ -60,14 +61,19 @@ amacrine.diameter.sizeMM = [];
 
 
 %% Parasol RGCs
-% Kara -- place here some text about parasol cells and the citation
-% information for these
+% Avergae measured parasol cell densities *100 cells/square mm from six macaque retinas
+% Silveira, L. C. L., and V. H. Perry. "The topography of magnocellular projecting ganglion cells (M-ganglion cells) in the primate retina." 
+% Neuroscience 40.1 (1991): 217-237.
 
-% Data from Silviera et al 1990, Figures 16 and 17
+% Data from Silviera et al. 1991, Figures 16 and 17
 parasol.density.supportMM.temporal = 1:1:22;
 parasol.density.countsMMSq.temporal = [21.5, 15.5, 9, 4.6, 3, 2.2, 1.7, 1.1, 0.7, 0.56, 0.4, 0.2, 0.1, nan, nan, nan, nan, nan, nan, nan, nan, nan];
 parasol.density.supportMM.nasal = 1:1:22;
-parasol.density.countsMMSq.nasal = [];
+parasol.density.countsMMSq.nasal = [33.5, 25.6, nan, nan, nan, 5.2, 4.85, 4.15, 4, 3.8, 3.45, 2.8, 2.55, 2.5, 2.3, 1.95, 1.5, 1.3, 0.65, 0.35, 0.3, 0.2];
+parasol.density.supportMM.superior = 1:1:22;
+parasol.density.countsMMSq.superior = [16.1, 7, 4.05, 3, 2.4, 1.75, 1.4, 0.95, 0.8, 0.7, 0.55, 0.5, 0.35, 0.25, 0.3, 0.3, 0.4, nan, nan, nan, nan, nan];
+parasol.density.supportMM.inferior = 1:1:22;
+parasol.density.countsMMSq.inferior = [18.2, 11, 7.25, 3.7, 2.7, 2.05, 1.7, 1.1, 0.95, 0.75, 0.53, 0.48, 0.25, 0.05, nan, nan, nan, nan, nan, nan, nan];
 
 % Parasol cell body sizes
 % Put comments here about where this info comes from
