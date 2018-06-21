@@ -64,11 +64,9 @@ end
 
 % Amacrine cell body sizes
 % Data from Curcio & Allen 1990, Figure 3
-% The support for this is the frequency it is measured in, I assumed percentages but it adds up to well over 100%
+% The support for this is the frequency it is measured in, I assumed percentages but it adds up to well over 100%, ask about x & y axes
 amacrine.diameter.supportMM = [1, 3.95, 11.95, 55, 34.1, 11, 13, 6, 4.95, 0.8, 0.9];
-amacrine.diameter.sizeMM = 7:7:17;
-% Did I write 7-17 correct for size?
-% X and Y axis swapped here because diameter is the size we want?
+amacrine.diameter.sizeMM = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
 %% Parasol RGCs
 % Average parasol cell densities across four meridians measured in cells/square mm from six macaque retinas
