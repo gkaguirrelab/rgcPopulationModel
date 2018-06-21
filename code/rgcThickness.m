@@ -64,13 +64,15 @@ end
 
 % Amacrine cell body sizes
 % Data from Curcio & Allen 1990, Figure 3
-%frequency measurements??
-amacrine.diameter.supportMM = [];
-amacrine.diameter.sizeMM = [];
-
+% The support for this is the frequency it is measured in, I assumed percentages but it adds up to well over 100%
+amacrine.diameter.supportMM = [1, 3.95, 11.95, 55, 34.1, 11, 13, 6, 4.95, 0.8, 0.9];
+amacrine.diameter.sizeMM = 7:7:17;
+% Did I write 7-17 correct for size?
+% X and Y axis swapped here because diameter is the size we want?
 
 %% Parasol RGCs
 % Average parasol cell densities across four meridians measured in cells/square mm from six macaque retinas
+% 
 % Silveira, L. C. L., and V. H. Perry. "The topography of magnocellular projecting ganglion cells (M-ganglion cells)
 % in the primate retina." Neuroscience 40.1 (1991): 217-237.
 
@@ -113,6 +115,8 @@ parasol.diameter.sizeMM = [11.27, 12.57, 13.79, 15.02, 16.16, 14.46, 18.23, 18.6
 
 
 %% Bistratified RGCs
+
+% Bistratified cell density
 bistratified.density.supportMM.temporal = [];
 bistratified.density.countsMMSq.temporal = [];
 
@@ -122,7 +126,11 @@ bistratified.proportion.countsMMSq.temporal = [];
 
 
 % Bistratified cell body sizes
-% Put comments here about where this info comes from
+% Data from Peterson & Dacey 2000, Figure 3B
+
+% Peterson, Beth B., and Dennis M. Dacey. "Morphology of wide-field bistratified and 
+% diffuse human retinal ganglion cells." Visual neuroscience 17.4 (2000): 567-578.
+
 bistratified.diameter.supportMM = [nan];
 bistratified.diameter.sizeMM = [.018];
 
@@ -136,12 +144,10 @@ end
 
 
 % Midget cell body sizes
-% This comes from Liu 2017, Figure 4B
-% support in degrees??
-
+% Data from Liu 2017, Figure 4B
+% The support is in range of degrees 
 % Liu, Zhuolin, et al. "Imaging and quantifying ganglion cells and other transparent neurons
 % in the living human retina." Proceedings of the National Academy of Sciences (2017): 201711734.
-
 midget.diameter.supportMM = [1.5-3, 3-4.5, 6-7.5, 8-9.5, 12-13.5];
 midget.diameter.sizeMM = [.0115, .0113, .0114, .0118, .01315];
 
