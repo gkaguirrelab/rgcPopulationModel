@@ -70,19 +70,19 @@ amacrine.diameter.sizeMM = [];
 
 
 %% Parasol RGCs
-% Avergae measured parasol cell densities *100 cells/square mm from six macaque retinas
+% Average parasol cell densities across four meridians measured in cells/square mm from six macaque retinas
 % Silveira, L. C. L., and V. H. Perry. "The topography of magnocellular projecting ganglion cells (M-ganglion cells)
 % in the primate retina." Neuroscience 40.1 (1991): 217-237.
 
-% Data from Silviera et al. 1991, Figures 16 and 17
+% Data from Silviera et al. 1991, Figures 16
 parasol.density.supportMM.temporal = 1:1:22;
-parasol.density.countsMMSq.temporal = [21.5, 15.5, 9, 4.6, 3, 2.2, 1.7, 1.1, 0.7, 0.56, 0.4, 0.2, 0.1, nan, nan, nan, nan, nan, nan, nan, nan, nan];
+parasol.density.countsMMSq.temporal = [2150, 1550, 900, 460, 300, 220, 170, 110, 70, 56, 40, 20, 10, nan, nan, nan, nan, nan, nan, nan, nan, nan];
 parasol.density.supportMM.nasal = 1:1:22;
-parasol.density.countsMMSq.nasal = [33.5, 25.6, nan, nan, nan, 5.2, 4.85, 4.15, 4, 3.8, 3.45, 2.8, 2.55, 2.5, 2.3, 1.95, 1.5, 1.3, 0.65, 0.35, 0.3, 0.2];
+parasol.density.countsMMSq.nasal = [3350, 2560, nan, nan, nan, 520, 485, 415, 400, 380, 345, 280, 255, 250, 230, 195, 150, 130, 65, 35, 30, 20];
 parasol.density.supportMM.superior = 1:1:22;
-parasol.density.countsMMSq.superior = [16.1, 7, 4.05, 3, 2.4, 1.75, 1.4, 0.95, 0.8, 0.7, 0.55, 0.5, 0.35, 0.25, 0.3, 0.3, 0.4, nan, nan, nan, nan, nan];
+parasol.density.countsMMSq.superior = [1610, 700, 405, 300, 240, 175, 140, 95, 80, 70, 55, 50, 35, 25, 30, 30, 40, nan, nan, nan, nan, nan];
 parasol.density.supportMM.inferior = 1:1:22;
-parasol.density.countsMMSq.inferior = [18.2, 11, 7.25, 3.7, 2.7, 2.05, 1.7, 1.1, 0.95, 0.75, 0.53, 0.48, 0.25, 0.05, nan, nan, nan, nan, nan, nan, nan];
+parasol.density.countsMMSq.inferior = [1820, 1100, 725, 370, 270, 205, 170, 110, 95, 75, 53, 48, 25, 05, nan, nan, nan, nan, nan, nan, nan];
 
 % Obtain a spline fit to the parasol densities
 for mm = 1:length(p.Results.cardinalMeridianAngles)
@@ -92,18 +92,24 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
 end
 
 
-% KARA -- put in the values you digitize from the proportion figure here. You may need to edit the support MM too.
-parasol.proportion.supportMM.temporal = 1:1:22;
-parasol.proportion.countsMMSq.temporal = [];
-
+% Parasol proportion of all retinal ganglion cells
+% Data from Silviera et al. 1991, Figure 17
+parasol.proportion.supportMM.nasal = [1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
+parasol.proportion.countsMMSq.nasal = [9.8, 9.64, nan, nan, nan, 7.58, 9.5, 11.74, 13.98, 19.18, 20.78, 15.99, 19.83, 20.32, 24.55, 26.87, 19.93];
+parasol.proportion.supportMM.temporal = [1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
+parasol.proportion.countsMMSq.temporal = [6.6, 8.44, 9.09, 8.45, 8.85, 10.54, 10.86, 9.51, 9.27, 8.56, 5.69, 2.97, 4.98, nan, nan, nan, nan];
+parasol.proportion.supportMM.superior = [.96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
+parasol.proportion.countsMMSq.superior = [5.8, 4.71, 4.48, 5.68, 7.91, 8.08, 8.57, 9.38, 9.23, 8.53, 10.44, 11.48, 13.32, 11.9, 9.93];
+parasol.proportion.supportMM.inferior = [.96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
+parasol.proportion.countsMMSq.inferior = [5.73, 5.58, 7.18, 5.6, 6.96, 8.72, 8.81, 10.01, 8.28, 9.4, 7.74, 9.42, 6.81, 4.68, nan];
 
 % Parasol cell body sizes
 % Data from Perry et al. 1984, Figure 6C
 
 % Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that project to the dorsal
 % lateral geniculate nucleus in the macaque monkey." Neuroscience 12.4 (1984): 1101-1123.
-parasol.diameter.supportMM = [];
-parasol.diameter.sizeMM = [];
+parasol.diameter.supportMM = [0.53, 1.07, 1.47, 1.96, 2.5, 3.1, 3.5, 4, 4.55, 5, 5.53, 6, 6.47, 7, 7.53, 8.05, 9, 9.65, 10.33, 11.4, 12.66, 13.63, 14.21];
+parasol.diameter.sizeMM = [11.27, 12.57, 13.79, 15.02, 16.16, 14.46, 18.23, 18.69, 19.98, 20.9, 22.05, 22.51, 23.35, 23.88, 24.34, 23.5, 27.4, 25.95, 24.19, 23.81, 22.74, 22.35, 20.11];
 
 
 %% Bistratified RGCs
