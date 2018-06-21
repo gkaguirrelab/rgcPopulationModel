@@ -1,5 +1,5 @@
 function rgcThickness(varargin )
-% Caclulates RGC layer thickness by reference to constituent cell classes 
+% Caclulates RGC layer thickness by reference to constituent cell classes
 %
 % Description:
 %   Here goes some text.
@@ -36,13 +36,15 @@ p.parse(varargin{:})
 % rgcDisplacementMap toolbox is referenced in eccentricity units of degrees
 % retina, and provides densities in square degrees retina. We convert those
 % values here to mm and square mm.
-fitRGCDensitySqDegRetina = getSplineFitToRGCDensitySqDegRetina(p.Results.polarAngle);
-fitRGCDensitySqMMRetina = @(posMMretina) fitRGCDensitySqDegRetina(convert_mmRetina_to_degRetina(posMMretina)).*calc_degSqRetina_per_mmSqRetina();
+for mm = 1:length(p.Results.cardinalMeridianAngles)
+    tmpFit = getSplineFitToRGCDensitySqDegRetina(p.Results.cardinalMeridianAngles(mm));
+    totalRGC.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = @(posMMretina) tmpFit(convert_mmRetina_to_degRetina(posMMretina))'.*calc_degSqRetina_per_mmSqRetina();
+end
 
 
 %% Displaced amacrine cells
 % Curcio & Allen 1990 distinguished displaced amacrine cells from retinal ganglion cells through imagin
-% and evalutating their morphology and determined their soma size and densities at eccentricities 
+% and evalutating their morphology and determined their soma size and densities at eccentricities
 % across the human retina. Amacrine cell densities are averages across four meridians.
 %
 %   Curcio, Christine A., and Kimberly A. Allen. "Topography of ganglion
@@ -53,6 +55,13 @@ fitRGCDensitySqMMRetina = @(posMMretina) fitRGCDensitySqDegRetina(convert_mmReti
 amacrine.density.supportMM.temporal = [0, 0.11, 0.23, 0.4, 0.65, 0.86, 1.45, 2.46, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.6, 12.6, 13.6, 14.6, 15.6, 16.6, 17.7, 18.65, 19.65];
 amacrine.density.countsMMSq.temporal = [73, 124, 317, 542, 689, 813, 1052, 1112, 1159, 1187, 1146, 1069, 992, 942, 888, 848, 798, 767, 731, 699, 677, 650, 642, 652, 676];
 
+% Obtain a spline fit to the amacrine densities
+for mm = 3:3 %length(p.Results.cardinalMeridianAngles)
+    amacrine.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = ...
+        fit(amacrine.density.supportMM.(p.Results.cardinalMeridianNames{mm})', amacrine.density.countsMMSq.(p.Results.cardinalMeridianNames{mm})', 'smoothingspline');
+end
+
+
 % Amacrine cell body sizes
 % Data from Curcio & Allen 1990, Figure 3
 %frequency measurements??
@@ -62,7 +71,7 @@ amacrine.diameter.sizeMM = [];
 
 %% Parasol RGCs
 % Avergae measured parasol cell densities *100 cells/square mm from six macaque retinas
-% Silveira, L. C. L., and V. H. Perry. "The topography of magnocellular projecting ganglion cells (M-ganglion cells) 
+% Silveira, L. C. L., and V. H. Perry. "The topography of magnocellular projecting ganglion cells (M-ganglion cells)
 % in the primate retina." Neuroscience 40.1 (1991): 217-237.
 
 % Data from Silviera et al. 1991, Figures 16 and 17
@@ -75,10 +84,18 @@ parasol.density.countsMMSq.superior = [16.1, 7, 4.05, 3, 2.4, 1.75, 1.4, 0.95, 0
 parasol.density.supportMM.inferior = 1:1:22;
 parasol.density.countsMMSq.inferior = [18.2, 11, 7.25, 3.7, 2.7, 2.05, 1.7, 1.1, 0.95, 0.75, 0.53, 0.48, 0.25, 0.05, nan, nan, nan, nan, nan, nan, nan];
 
+% Obtain a spline fit to the parasol densities
+for mm = 1:length(p.Results.cardinalMeridianAngles)
+    nonNanSupportIdx = ~isnan(parasol.density.countsMMSq.(p.Results.cardinalMeridianNames{mm}));
+    parasol.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = ...
+        fit(parasol.density.supportMM.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)', parasol.density.countsMMSq.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)', 'smoothingspline');
+end
+
+
 % Parasol cell body sizes
 % Data from Perry et al. 1984, Figure 6C
 
-% Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that project to the dorsal 
+% Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that project to the dorsal
 % lateral geniculate nucleus in the macaque monkey." Neuroscience 12.4 (1984): 1101-1123.
 parasol.diameter.supportMM = [];
 parasol.diameter.sizeMM = [];
@@ -96,15 +113,17 @@ bistratified.diameter.sizeMM = [.018];
 
 %% Midget RGCs
 
-% These density functions will come from Geoff's code
-midget.density.supportMM.temporal = [];
-midget.density.countsMMSq.temporal = [];
+% Obtain a spline fit to RGC density values from Curcio & Allen
+for mm = 1:length(p.Results.cardinalMeridianAngles)
+    midget.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = createMidgetDensityFunc(p.Results.cardinalMeridianAngles(mm));
+end
+
 
 % Midget cell body sizes
 % This comes from Liu 2017, Figure 4B
 % support in degrees??
 
-% Liu, Zhuolin, et al. "Imaging and quantifying ganglion cells and other transparent neurons 
+% Liu, Zhuolin, et al. "Imaging and quantifying ganglion cells and other transparent neurons
 % in the living human retina." Proceedings of the National Academy of Sciences (2017): 201711734.
 
 midget.diameter.supportMM = [1.5-3, 3-4.5, 6-7.5, 8-9.5, 12-13.5];
@@ -113,6 +132,53 @@ midget.diameter.sizeMM = [.0115, .0113, .0114, .0118, .01315];
 
 % Calculate thickness
 
+supportMM = 0:0.01:6;
+plot(totalRGC.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM))
+hold on
+plot(midget.density.fitMMSq.temporal(supportMM))
+plot(parasol.density.fitMMSq.temporal(supportMM).*100)
+plot(amacrine.density.fitMMSq.temporal(supportMM))
+
+plot(midget.density.fitMMSq.temporal(supportMM) + parasol.density.fitMMSq.temporal(supportMM).*100 + amacrine.density.fitMMSq.temporal(supportMM),'xr')
 
 end % rgcThickness function
 
+
+%% LOCAL FUNCTIONS
+
+function midgetDensityFitMMSq = createMidgetDensityFunc(meridianAngle)
+
+% The Barnett & Aguirre 2018 Linking Function parameters for each of the
+% cardinal meridians (0, 90, 180, 270).
+midgetFracLinkingParams = [...
+   4.3286    1.6160; ...
+   4.2433    1.5842; ...
+   4.2433    1.5842; ...
+   4.2433    1.6160];
+
+% Define a support vector in retinal degrees
+regularSupportPosDegRetina = 0:0.01:30;
+
+% Obtain the spline fit function to total RGC density
+fitRGCDensitySqDegRetina = getSplineFitToRGCDensitySqDegRetina(meridianAngle);
+
+% Define a variable with RGC density over regular support and zero values
+% at the optic disc positions
+RGCDensityOverRegularSupport = ...
+    zeroOpticDiscPoints(fitRGCDensitySqDegRetina(regularSupportPosDegRetina),regularSupportPosDegRetina, meridianAngle);
+
+% Define the mRGC density function using the Barnett & Aguirre 2018 linking
+% function parameters
+mRGCDensityOverRegularSupport = transformRGCToMidgetRGCDensityDacey(regularSupportPosDegRetina,RGCDensityOverRegularSupport,...
+    'linkingFuncParams',midgetFracLinkingParams(meridianAngle/90+1,:));
+
+% Perform a spline fit to the mRGC density expressed in mm and mm sq units
+midgetDensityFitMMSq = fit(convert_degRetina_to_mmRetina(regularSupportPosDegRetina)', (mRGCDensityOverRegularSupport.*calc_degSqRetina_per_mmSqRetina())', 'smoothingspline');
+
+end
+
+function vectorOut = zeroOpticDiscPoints(vectorIn, regularSupportPosDegRetina, polarAngle)
+opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, polarAngle);
+vectorOut = vectorIn;
+vectorOut(opticDiscIndices) = 0;
+end
