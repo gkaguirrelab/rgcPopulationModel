@@ -92,6 +92,11 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
 end
 
 
+% KARA -- put in the values you digitize from the proportion figure here. You may need to edit the support MM too.
+parasol.proportion.supportMM.temporal = 1:1:22;
+parasol.proportion.countsMMSq.temporal = [];
+
+
 % Parasol cell body sizes
 % Data from Perry et al. 1984, Figure 6C
 
@@ -104,6 +109,11 @@ parasol.diameter.sizeMM = [];
 %% Bistratified RGCs
 bistratified.density.supportMM.temporal = [];
 bistratified.density.countsMMSq.temporal = [];
+
+% Kara -- you may just have proportion values instead of density for the bistratified. Put the numbers here
+bistratified.proportion.supportMM.temporal = [];
+bistratified.proportion.countsMMSq.temporal = [];
+
 
 % Bistratified cell body sizes
 % Put comments here about where this info comes from
