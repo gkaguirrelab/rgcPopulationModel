@@ -43,8 +43,8 @@ end
 
 
 %% Displaced amacrine cells
-% Curcio & Allen 1990 distinguished displaced amacrine cells from retinal ganglion cells through imagin
-% and evalutating their morphology and determined their soma size and densities at eccentricities
+% Curcio & Allen 1990 distinguished displaced amacrine cells from retinal ganglion cells through imaging
+% and evalutating their morphology, and determined their soma size and densities at eccentricities
 % across the human retina. Amacrine cell densities are averages across four meridians.
 %
 %   Curcio, Christine A., and Kimberly A. Allen. "Topography of ganglion
@@ -117,9 +117,9 @@ end
 
 % Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that project to the dorsal
 % lateral geniculate nucleus in the macaque monkey." Neuroscience 12.4 (1984): 1101-1123.
-% ARE WE CERTAIN THE SUPPRT IS IN MM?
-parasol.diameter.supportMM = [0.53, 1.07, 1.47, 1.96, 2.5, 3.1, 3.5, 4, 4.55, 5, 5.53, 6, 6.47, 7, 7.53, 8.05, 9, 9.65, 10.33, 11.4, 12.66, 13.63, 14.21];
-parasol.diameter.sizeMM = [11.27, 12.57, 13.79, 15.02, 16.16, 14.46, 18.23, 18.69, 19.98, 20.9, 22.05, 22.51, 23.35, 23.88, 24.34, 23.5, 27.4, 25.95, 24.19, 23.81, 22.74, 22.35, 20.11];
+
+parasol.diameter.supportMM = [0.53, 1.07, 1.47, 1.96, 2.5, 3.1, 3.5, 4.0, 4.55, 5.0, 5.53, 6.0, 6.47, 7.0, 7.53, 8.05, 9.0, 9.65, 10.33, 11.4, 12.66, 13.63, 14.21];
+parasol.diameter.sizeMM = [0.0113, 0.0126, 0.0138, 0.015, 0.0162, 0.0145, 0.0182, 0.0187, 0.02, 0.0209, 0.0221, 0.0225, 0.0234, 0.0239, 0.0243, 0.0235, 0.0274, 0.026, 0.0242, 0.0238, 0.0227, 0.0224, 0.0201];
 parasol.diameter.fitMM = fit(parasol.diameter.supportMM', parasol.diameter.sizeMM','smoothingspline');
 
 
@@ -137,7 +137,7 @@ bistratified.proportion.countsMMSq.temporal = [];
 %   neuroscience 17.4 (2000): 567-578.
 
 bistratified.diameter.supportMM = [nan];
-bistratified.diameter.sizeMM = [.018];
+bistratified.diameter.sizeMM = [0.018];
 bistratified.diameter.fitMM = @(x) 0.018;
 
 %% Midget RGCs
@@ -158,7 +158,7 @@ end
 midget.diameter.supportDeg = [(1.5+3)/2, (3+4.5)/2, (6+7.5)/2, (8+9.5)/2, (12+13.5)/2];
 % Are the data from the horizontal meridian? Temporal or nasal retina?
 midget.diameter.supportMM = convert_degVisual_to_mmRetina(midget.diameter.supportDeg, 0);
-midget.diameter.sizeMM = [.0115, .0113, .0114, .0118, .01315];
+midget.diameter.sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315];
 
 % Obtain a spline fit
 midget.diameter.fitMM = fit(midget.diameter.supportMM', midget.diameter.sizeMM', 'smoothingspline');
