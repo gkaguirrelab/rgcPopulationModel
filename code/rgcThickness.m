@@ -82,15 +82,14 @@ amacrine.diameter.fitMM = @(x) 0.011;
 
 % Parasol proportion of all retinal ganglion cells Data from Silviera et
 % al. 1991, Figure 17
-%% PLEASE CONVERT FROM PERCENTAGES TO PROPORTIONS (i.e., divide by 100)
 parasol.proportion.supportMM.nasal = [0 1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
-parasol.proportion.value.nasal = [0 9.8, 9.64, nan, nan, nan, 7.58, 9.5, 11.74, 13.98, 19.18, 20.78, 15.99, 19.83, 20.32, 24.55, 26.87, 19.93];
+parasol.proportion.value.nasal = [0 .098, .0964, nan, nan, nan, .0758, .095, .1174, .1398, .1918, .2078, .1599, .1983, .2032, .2455, .2687, .1993];
 parasol.proportion.supportMM.temporal = [0 1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
-parasol.proportion.value.temporal = [0 6.6, 8.44, 9.09, 8.45, 8.85, 10.54, 10.86, 9.51, 9.27, 8.56, 5.69, 2.97, 4.98, nan, nan, nan, nan];
+parasol.proportion.value.temporal = [0 .066, .0844, .0909, .0845, .0885, .1054, .1086, .0951, .0927, .0856, .0569, .0297, .0498, nan, nan, nan, nan];
 parasol.proportion.supportMM.superior = [0 .96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
-parasol.proportion.value.superior = [0 5.8, 4.71, 4.48, 5.68, 7.91, 8.08, 8.57, 9.38, 9.23, 8.53, 10.44, 11.48, 13.32, 11.9, 9.93];
+parasol.proportion.value.superior = [0 .058, .0471, .0448, .0568, .0791, .0808, .0857, .0938, .0923, .0853, .1044, .1148, .1332, .119, .0993];
 parasol.proportion.supportMM.inferior = [0 .96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
-parasol.proportion.value.inferior = [0 5.73, 5.58, 7.18, 5.6, 6.96, 8.72, 8.81, 10.01, 8.28, 9.4, 7.74, 9.42, 6.81, 4.68, nan];
+parasol.proportion.value.inferior = [0 .0573, .0558, .0718, .056, .0696, .0872, .0881, .1001, .0828, .094, .0774, .0942, .0681, .0468, nan];
 
 % Obtain a spline fit to the parasol densities
 for mm = 1:length(p.Results.cardinalMeridianAngles)
@@ -122,8 +121,10 @@ parasol.diameter.fitMM = fit(parasol.diameter.supportMM', parasol.diameter.sizeM
 
 % Bistratified proportion
 % Data from Dacey 1993, Figure 13b:
-bistratified.proportion.supportMM.temporal = [];
-bistratified.proportion.countsMMSq.temporal = [];
+% Dacey, Dennis M. "Morphology of a small-field bistratified ganglion cell type in the macaque and human retina." 
+% Visual neuroscience 10.6 (1993): 1081-1098.
+bistratified.proportion.supportMM.temporal = [.97, 1.96, 2.91, 3.92, 4.91, 5.92, 6.89, 7.84, 8.85, 9.86, 10.89, 11.9, 12.91, 13.84, 14.91;
+bistratified.proportion.countsMMSq.temporal = [.0135, .0168, .0202, .0241, .0284, .0324, .0364, .0403, .0447, .0485, .0538, .0573, .0603, .0641, .0662];
 
 % Bistratified cell body sizes
 % Data from Figure 3B:
