@@ -2,7 +2,15 @@ function rgcThickness(varargin )
 % Caclulates RGC layer thickness by reference to constituent cell classes
 %
 % Description:
-%   Here goes some text.
+%   We aim to create a model of the thickness of the retinal ganglion cell layer and how it vaires with eccentricity, comparing our
+%   estimations to reports from histology and OCT scanned images. We will calculate the thickness of the RGC layer using data from 
+%   histology on the population of midget, parasol, and bistratified ganglion cells as well as displaced amacrine cells. Specifically,
+%   the proportion of cell types, their size, and their densities and how these three amounts vary with eccentricity. The volume of space
+%   each cell type takes up will be combined to create a coherent digital map of the human retinal ganglion cell layer. This project
+%   utilizes largely generalized averages of cell sizes and proportions, and does not take into account the different subtypes of ganglion 
+%   cells such as ON and OFF center midget and parasol cells, widefield, smallfield, and diffuse bistratified cells, or the many types of 
+%   amacrine cells. The use of average proportions, sizes, and densities, are noted throughout and still create an accurate estimate of 
+%   RGC thickness.
 %
 % Inputs:
 %
