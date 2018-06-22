@@ -113,7 +113,6 @@ end
 % Parasol cell body sizes
 % Data from Perry et al. 1984, Figure 6C
 
-%% KARA -- The size values below look like microns instead of mm
 
 % Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that project to the dorsal
 % lateral geniculate nucleus in the macaque monkey." Neuroscience 12.4 (1984): 1101-1123.
@@ -154,7 +153,7 @@ end
 %   transparent neurons in the living human retina." Proceedings of the
 %   National Academy of Sciences (2017): 201711734.
 
-% Support in the source data is in degrees (of visual field or retina??) 
+% Support in the source data is in degrees of visual field
 midget.diameter.supportDeg = [(1.5+3)/2, (3+4.5)/2, (6+7.5)/2, (8+9.5)/2, (12+13.5)/2];
 % Are the data from the horizontal meridian? Temporal or nasal retina?
 midget.diameter.supportMM = convert_degVisual_to_mmRetina(midget.diameter.supportDeg, 0);
