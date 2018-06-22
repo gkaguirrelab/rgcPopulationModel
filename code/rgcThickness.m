@@ -2,15 +2,22 @@ function rgcThickness(varargin )
 % Caclulates RGC layer thickness by reference to constituent cell classes
 %
 % Description:
-%   We aim to create a model of the thickness of the retinal ganglion cell layer and how it vaires with eccentricity, comparing our
-%   estimations to reports from histology and OCT scanned images. We will calculate the thickness of the RGC layer using data from 
-%   histology on the population of midget, parasol, and bistratified ganglion cells as well as displaced amacrine cells. Specifically,
-%   the proportion of cell types, their size, and their densities and how these three amounts vary with eccentricity. The volume of space
-%   each cell type takes up will be combined to create a coherent digital map of the human retinal ganglion cell layer. This project
-%   utilizes largely generalized averages of cell sizes and proportions, and does not take into account the different subtypes of ganglion 
-%   cells such as ON and OFF center midget and parasol cells, widefield, smallfield, and diffuse bistratified cells, or the many types of 
-%   amacrine cells. The use of average proportions, sizes, and densities, are noted throughout and still create an accurate estimate of 
-%   RGC thickness.
+%   We aim to create a model of the thickness of the retinal ganglion cell
+%   layer and how it vaires with eccentricity, comparing our estimations to
+%   reports from histology and OCT scanned images. We will calculate the
+%   thickness of the RGC layer using data from histology on the population
+%   of midget, parasol, and bistratified ganglion cells as well as
+%   displaced amacrine cells. Specifically, the proportion of cell types,
+%   their size, and their densities and how these three amounts vary with
+%   eccentricity. The volume of space each cell type takes up will be
+%   combined to create a coherent digital map of the human retinal ganglion
+%   cell layer. This project utilizes largely generalized averages of cell
+%   sizes and proportions, and does not take into account the different
+%   subtypes of ganglion cells such as ON and OFF center midget and parasol
+%   cells, widefield, smallfield, and diffuse bistratified cells, or the
+%   many types of amacrine cells. The use of average proportions, sizes,
+%   and densities, are noted throughout and still create an accurate
+%   estimate of RGC thickness.
 %
 % Inputs:
 %
@@ -90,23 +97,23 @@ amacrine.diameter.fitMM = @(x) 0.011;
 
 % Parasol proportion of all retinal ganglion cells Data from Silviera et
 % al. 1991, Figure 17
-parasol.proportion.supportMM.nasal = [0 1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
-parasol.proportion.value.nasal = [0 .098, .0964, nan, nan, nan, .0758, .095, .1174, .1398, .1918, .2078, .1599, .1983, .2032, .2455, .2687, .1993];
+parasol.proportion.supportMM.nasal = [1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
+parasol.proportion.value.nasal = [.098, .0964, nan, nan, nan, .0758, .095, .1174, .1398, .1918, .2078, .1599, .1983, .2032, .2455, .2687, .1993];
 parasol.proportion.supportMM.temporal = [0 1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
-parasol.proportion.value.temporal = [0 .066, .0844, .0909, .0845, .0885, .1054, .1086, .0951, .0927, .0856, .0569, .0297, .0498, nan, nan, nan, nan];
-parasol.proportion.supportMM.superior = [0 .96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
-parasol.proportion.value.superior = [0 .058, .0471, .0448, .0568, .0791, .0808, .0857, .0938, .0923, .0853, .1044, .1148, .1332, .119, .0993];
-parasol.proportion.supportMM.inferior = [0 .96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
-parasol.proportion.value.inferior = [0 .0573, .0558, .0718, .056, .0696, .0872, .0881, .1001, .0828, .094, .0774, .0942, .0681, .0468, nan];
+parasol.proportion.value.temporal = [.066, .0844, .0909, .0845, .0885, .1054, .1086, .0951, .0927, .0856, .0569, .0297, .0498, nan, nan, nan, nan];
+parasol.proportion.supportMM.superior = [.96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
+parasol.proportion.value.superior = [.058, .0471, .0448, .0568, .0791, .0808, .0857, .0938, .0923, .0853, .1044, .1148, .1332, .119, .0993];
+parasol.proportion.supportMM.inferior = [.96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
+parasol.proportion.value.inferior = [.0573, .0558, .0718, .056, .0696, .0872, .0881, .1001, .0828, .094, .0774, .0942, .0681, .0468, nan];
 
 % Obtain a spline fit to the parasol densities
 for mm = 1:length(p.Results.cardinalMeridianAngles)
     nonNanSupportIdx = ~isnan(parasol.proportion.value.(p.Results.cardinalMeridianNames{mm}));
     tmpSupport = parasol.proportion.supportMM.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)';
     parasol.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = ...
-        fit( tmpSupport, ...        
-        totalRGC.density.fitMMSq.(p.Results.cardinalMeridianNames{mm})(tmpSupport)' .* ...
-        parasol.proportion.value.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)' ./100, ...
+        fit( [0; tmpSupport], ...        
+        [0; totalRGC.density.fitMMSq.(p.Results.cardinalMeridianNames{mm})(tmpSupport)' .* ...
+        parasol.proportion.value.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)'], ...
         'smoothingspline');
 end
 
@@ -121,7 +128,7 @@ end
 % larger in the human than in the macaque. We scale up the diameter values
 % accordigly.
 parasol.diameter.supportMM = [0.53, 1.07, 1.47, 1.96, 2.5, 3.1, 3.5, 4.0, 4.55, 5.0, 5.53, 6.0, 6.47, 7.0, 7.53, 8.05, 9.0, 9.65, 10.33, 11.4, 12.66, 13.63, 14.21];
-parasol.diameter.sizeMM = [0.0153, 0.017, 0.0186, 0.0203, 0.02187, 0.0196, 0.0246, 0.0252, 0.027, 0.0282, 0.0298, 0.0304, 0.0316, 0.0323, 0.0328, 0.0317, 0.037, 0.0351, 0.0327, 0.0321, 0.0306, 0.0302, 0.02713];
+parasol.diameter.sizeMM = 1.35.*[0.0153, 0.017, 0.0186, 0.0203, 0.02187, 0.0196, 0.0246, 0.0252, 0.027, 0.0282, 0.0298, 0.0304, 0.0316, 0.0323, 0.0328, 0.0317, 0.037, 0.0351, 0.0327, 0.0321, 0.0306, 0.0302, 0.02713];
 parasol.diameter.fitMM = fit(parasol.diameter.supportMM', parasol.diameter.sizeMM','smoothingspline');
 
 
@@ -129,10 +136,28 @@ parasol.diameter.fitMM = fit(parasol.diameter.supportMM', parasol.diameter.sizeM
 
 % Bistratified proportion
 % Data from Dacey 1993, Figure 13b:
-% Dacey, Dennis M. "Morphology of a small-field bistratified ganglion cell type in the macaque and human retina." 
-% Visual neuroscience 10.6 (1993): 1081-1098.
-bistratified.proportion.supportMM.temporal = [.97, 1.96, 2.91, 3.92, 4.91, 5.92, 6.89, 7.84, 8.85, 9.86, 10.89, 11.9, 12.91, 13.84, 14.91;
-bistratified.proportion.countsMMSq.temporal = [.0135, .0168, .0202, .0241, .0284, .0324, .0364, .0403, .0447, .0485, .0538, .0573, .0603, .0641, .0662];
+%   Dacey, Dennis M. "Morphology of a small-field bistratified ganglion
+%   cell type in the macaque and human retina." Visual neuroscience 10.6
+%   (1993): 1081-1098.
+%
+% Dacey provided values for the temporal retina; we assume these values
+% hold for all meridians
+for mm = 1:length(p.Results.cardinalMeridianAngles)
+    bistratified.proportion.supportMM.(p.Results.cardinalMeridianNames{mm}) = [.97, 1.96, 2.91, 3.92, 4.91, 5.92, 6.89, 7.84, 8.85, 9.86, 10.89, 11.9, 12.91, 13.84, 14.91];
+    bistratified.proportion.value.(p.Results.cardinalMeridianNames{mm}) = [.0135, .0168, .0202, .0241, .0284, .0324, .0364, .0403, .0447, .0485, .0538, .0573, .0603, .0641, .0662];
+end
+
+% Obtain a spline fit to the bistratified densities
+for mm = 1:length(p.Results.cardinalMeridianAngles)
+    nonNanSupportIdx = ~isnan(bistratified.proportion.value.(p.Results.cardinalMeridianNames{mm}));
+    tmpSupport = bistratified.proportion.supportMM.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)';
+    bistratified.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = ...
+        fit( [0; tmpSupport], ...        
+        [0; totalRGC.density.fitMMSq.(p.Results.cardinalMeridianNames{mm})(tmpSupport)' .* ...
+        bistratified.proportion.value.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)'], ...
+        'smoothingspline');
+end
+
 
 % Bistratified cell body sizes
 % Data from Figure 3B:
@@ -191,8 +216,11 @@ plot(supportMM, totalRGC.density.fitMMSq.temporal(supportMM) + amacrine.density.
 hold on
 plot(supportMM, midget.density.fitMMSq.temporal(supportMM))
 plot(supportMM, parasol.density.fitMMSq.temporal(supportMM))
+plot(supportMM, bistratified.density.fitMMSq.temporal(supportMM))
 plot(supportMM, amacrine.density.fitMMSq.temporal(supportMM))
-plot(supportMM, midget.density.fitMMSq.temporal(supportMM) + parasol.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM),'xr')
+plot(supportMM, midget.density.fitMMSq.temporal(supportMM) + parasol.density.fitMMSq.temporal(supportMM) + bistratified.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM),'xr')
+xlabel('eccentricity [mm retina]');
+ylabel('density [counts / sq mm]');
 
 % Volume of a sphere given diameter
 sVol = @(d) 4/3*pi*(d./2).^3;
@@ -206,8 +234,11 @@ sVol = @(d) 4/3*pi*(d./2).^3;
 % Plot volume
 subplot(1,2,2)
 volumeProfile = amacrine.density.fitMMSq.temporal(supportMM) .* sVol(amacrine.diameter.fitMM(supportMM)) + ...
-    parasol.density.fitMMSq.temporal(supportMM) .* sVol(parasol.diameter.fitMM(supportMM)./1000) + ...
+    parasol.density.fitMMSq.temporal(supportMM) .* sVol(parasol.diameter.fitMM(supportMM)) + ...
+    bistratified.density.fitMMSq.temporal(supportMM) .* sVol(bistratified.diameter.fitMM(supportMM)) + ...
     midget.density.fitMMSq.temporal(supportMM) .* sVol(midget.diameter.fitMM(supportMM));
+xlabel('eccentricity [mm retina]');
+ylabel('layer thickness [mm]]');
 
 plot(supportMM, volumeProfile);
 
