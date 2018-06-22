@@ -43,9 +43,10 @@ end
 
 
 %% Displaced amacrine cells
-% Curcio & Allen 1990 distinguished displaced amacrine cells from retinal ganglion cells through imaging
-% and evalutating their morphology, and determined their soma size and densities at eccentricities
-% across the human retina. Amacrine cell densities are averages across four meridians.
+% Curcio & Allen 1990 distinguished displaced amacrine cells from retinal
+% ganglion cells through imaging and evalutating their morphology, and
+% determined their soma size and densities at eccentricities across the
+% human retina. Amacrine cell densities are averages across four meridians.
 %
 %   Curcio, Christine A., and Kimberly A. Allen. "Topography of ganglion
 %   cells in human retina." Journal of comparative Neurology 300.1 (1990):
@@ -60,36 +61,28 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
         fit(amacrine.density.supportMM.(p.Results.cardinalMeridianNames{mm})', amacrine.density.countsMMSq.(p.Results.cardinalMeridianNames{mm})', 'smoothingspline');
 end
 
-% Amacrine cell body sizes Data from Curcio & Allen 1990, Figure 3 The
-% support for this is the frequency it is measured in, I assumed
-% percentages but it adds up to well over 100%, ask about x & y axes
-amacrine.diameter.supportMM = [1, 3.95, 11.95, 55, 34.1, 11, 13, 6, 4.95, 0.8, 0.9];
-amacrine.diameter.sizeMM = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
-amacrine.diameter.fitMM = @(x) 0.01;
+% Curcio & Allen 1990 examined the distribution of diamters of displaced
+% amacrine cells at a single eccentricity (5 mm temporal). Cells ranged in
+% size from 9-14 micrometers. We take the center of the plot (Figure 3,
+% right) to be 11 microns.
+%
+% We will continue to look for a reference that examines variation in
+% amacrine cell body size with eccentricity.
+amacrine.diameter.fitMM = @(x) 0.011;
+
 
 %% Parasol RGCs
 % Average parasol cell densities across four meridians measured in
-% cells/square mm from six macaque retinas
+% cells/square mm from six macaque retinas:
 % 
 %   Silveira, L. C. L., and V. H. Perry. "The topography of magnocellular
 %   projecting ganglion cells (M-ganglion cells) in the primate retina."
 %   Neuroscience 40.1 (1991): 217-237.
 
-% % Data from Silviera et al. 1991, Figures 16
-% parasol.density.supportMM.temporal = 1:1:22;
-% parasol.density.countsMMSq.temporal = [2150, 1550, 900, 460, 300, 220, 170, 110, 70, 56, 40, 20, 10, nan, nan, nan, nan, nan, nan, nan, nan, nan];
-% parasol.density.supportMM.nasal = 1:1:22;
-% parasol.density.countsMMSq.nasal = [3350, 2560, nan, nan, nan, 520, 485, 415, 400, 380, 345, 280, 255, 250, 230, 195, 150, 130, 65, 35, 30, 20];
-% parasol.density.supportMM.superior = 1:1:22;
-% parasol.density.countsMMSq.superior = [1610, 700, 405, 300, 240, 175, 140, 95, 80, 70, 55, 50, 35, 25, 30, 30, 40, nan, nan, nan, nan, nan];
-% parasol.density.supportMM.inferior = 1:1:22;
-% parasol.density.countsMMSq.inferior = [1820, 1100, 725, 370, 270, 205, 170, 110, 95, 75, 53, 48, 25, 05, nan, nan, nan, nan, nan, nan, nan];
-% 
-% 
 
-
-% Parasol proportion of all retinal ganglion cells
-% Data from Silviera et al. 1991, Figure 17
+% Parasol proportion of all retinal ganglion cells Data from Silviera et
+% al. 1991, Figure 17
+%% PLEASE CONVERT FROM PERCENTAGES TO PROPORTIONS (i.e., divide by 100)
 parasol.proportion.supportMM.nasal = [0 1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
 parasol.proportion.value.nasal = [0 9.8, 9.64, nan, nan, nan, 7.58, 9.5, 11.74, 13.98, 19.18, 20.78, 15.99, 19.83, 20.32, 24.55, 26.87, 19.93];
 parasol.proportion.supportMM.temporal = [0 1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
@@ -111,21 +104,24 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
 end
 
 % Parasol cell body sizes
-% Data from Perry et al. 1984, Figure 6C
-
-
-% Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that project to the dorsal
-% lateral geniculate nucleus in the macaque monkey." Neuroscience 12.4 (1984): 1101-1123.
-
+% Data from Perry et al. 1984, Figure 6C:
+%   Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that
+%   project to the dorsal lateral geniculate nucleus in the macaque
+%   monkey." Neuroscience 12.4 (1984): 1101-1123.
+%
+% These are the diameters observed as a function of eccentricity in the
+% macauqe. Dacey 1993 reports that parasol cell bodies are 1.35 times
+% larger in the human than in the macaque. We scale up the diameter values
+% accordigly.
 parasol.diameter.supportMM = [0.53, 1.07, 1.47, 1.96, 2.5, 3.1, 3.5, 4.0, 4.55, 5.0, 5.53, 6.0, 6.47, 7.0, 7.53, 8.05, 9.0, 9.65, 10.33, 11.4, 12.66, 13.63, 14.21];
-parasol.diameter.sizeMM = [0.0113, 0.0126, 0.0138, 0.015, 0.0162, 0.0145, 0.0182, 0.0187, 0.02, 0.0209, 0.0221, 0.0225, 0.0234, 0.0239, 0.0243, 0.0235, 0.0274, 0.026, 0.0242, 0.0238, 0.0227, 0.0224, 0.0201];
+parasol.diameter.sizeMM = 1.35 .* [0.0113, 0.0126, 0.0138, 0.015, 0.0162, 0.0145, 0.0182, 0.0187, 0.02, 0.0209, 0.0221, 0.0225, 0.0234, 0.0239, 0.0243, 0.0235, 0.0274, 0.026, 0.0242, 0.0238, 0.0227, 0.0224, 0.0201];
 parasol.diameter.fitMM = fit(parasol.diameter.supportMM', parasol.diameter.sizeMM','smoothingspline');
 
 
 %% Bistratified RGCs
 
-% Kara -- you may just have proportion values instead of density for the
-% bistratified. Put the numbers here
+% Bistratified proportion
+% Data from Dacey 1993, Figure 13b:
 bistratified.proportion.supportMM.temporal = [];
 bistratified.proportion.countsMMSq.temporal = [];
 
@@ -134,10 +130,17 @@ bistratified.proportion.countsMMSq.temporal = [];
 %   Peterson, Beth B., and Dennis M. Dacey. "Morphology of wide-field
 %   bistratified and diffuse human retinal ganglion cells." Visual
 %   neuroscience 17.4 (2000): 567-578.
+%
+% and Table 1 of:
+%
+%   Dacey, Dennis M. "Morphology of a small-field bistratified ganglion
+%   cell type in the macaque and human retina." Visual neuroscience 10.6
+%   (1993): 1081-1098.
+%
+% We model the cell body diameter as constant as a function of
+% eccentricity.
+bistratified.diameter.fitMM = @(x) 0.0189;
 
-bistratified.diameter.supportMM = [nan];
-bistratified.diameter.sizeMM = [0.018];
-bistratified.diameter.fitMM = @(x) 0.018;
 
 %% Midget RGCs
 
@@ -146,17 +149,24 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
     midget.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = createMidgetDensityFunc(p.Results.cardinalMeridianAngles(mm));
 end
 
-
-% Midget cell body sizes
-% Data from Figure 4B:
+% Midget cell body sizes Liu and colleagues 2017 report midget soma sizes
+% as a function of eccentricity as measured by AO-OCT:
 %   Liu, Zhuolin, et al. "Imaging and quantifying ganglion cells and other
 %   transparent neurons in the living human retina." Proceedings of the
 %   National Academy of Sciences (2017): 201711734.
+%
+% Dacey 1993 (Table 1) reports a larget size of 17.9 microns.
+%
+%   Dacey, Dennis M. "Morphology of a small-field bistratified ganglion
+%   cell type in the macaque and human retina." Visual neuroscience 10.6
+%   (1993): 1081-1098.
 
-% Support in the source data is in degrees of visual field
+% Support in the source data is in degrees of visual field along the
+% temporal retina
 midget.diameter.supportDeg = [(1.5+3)/2, (3+4.5)/2, (6+7.5)/2, (8+9.5)/2, (12+13.5)/2];
-% Are the data from the horizontal meridian? Temporal or nasal retina?
-midget.diameter.supportMM = convert_degVisual_to_mmRetina(midget.diameter.supportDeg, 0);
+
+% We convert from visual degrees back to retinal mm.
+midget.diameter.supportMM = convert_degVisual_to_mmRetina(midget.diameter.supportDeg, 180);
 midget.diameter.sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315];
 
 % Obtain a spline fit
@@ -175,7 +185,14 @@ plot(supportMM, parasol.density.fitMMSq.temporal(supportMM))
 plot(supportMM, amacrine.density.fitMMSq.temporal(supportMM))
 plot(supportMM, midget.density.fitMMSq.temporal(supportMM) + parasol.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM),'xr')
 
+% Volume of a sphere given diameter
 sVol = @(d) 4/3*pi*(d./2).^3;
+
+% Packing density of spheres. 
+%   https://en.wikipedia.org/wiki/Sphere_packing
+% Basically, we will want to inflate volume by about 25% to account for the
+% void space between backed spheres.
+
 
 % Plot volume
 subplot(1,2,2)
