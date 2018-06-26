@@ -81,9 +81,18 @@ end
 % size from 9-14 micrometers. We take the center of the plot (Figure 3,
 % right) to be 11 microns.
 %
-% We will continue to look for a reference that examines variation in
-% amacrine cell body size with eccentricity.
+% Data from Figure 5B, Dacey 1990
+% Dacey measured the soma diameter in dopaminergic amacrine cells from 2-16 mm eccentricity
+% from the fovea in 112 M. nemestrina monkeys. The fit was extrapolated to 0mm eccentricity and
+% out to just over 17mm. Soma diameter ranged from 11.2 to 16.6 microns. The data collected came from
+% Dacey's best fit line which had a weak positive significant correlation (P<.02).
+% 
+% Dacey, Dennis M. "The dopaminergic amacrine cell." Journal of Comparative Neurology 301.3 (1990): 461-489.
+%
+amacrine.diameter.supportMM = [0, 0.87, 1.68, 2.80, 3.76, 4.74, 5.86, 6.68, 7.36, 8.19, 8.71, 9.45, 9.97, 10.67, 11.45, 12.39, 13.47, 14.5, 15.62, 16.54, 17.82];
+amacrine.diameter.sizeMM = [.01259, .01266, .01274, .01286, .01303, .0132, .01324, .01332, .01336, .01335, .01353, .01361, .01365, .01373, .01381, .01394, .01402, .01419, .01423, .01439, .01452];
 amacrine.diameter.fitMM = @(x) 0.011;
+% WITH NEW DATA FROM DACEY 1990 WE DONT NEED THE LAST LINE HERE I THINK - WE NEED A SPLINE FIT - OR SHOULD WE ADD CURCIO TO DACEY
 
 
 %% Parasol RGCs
