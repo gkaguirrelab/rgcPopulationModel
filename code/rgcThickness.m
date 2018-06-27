@@ -76,23 +76,19 @@ for mm = 1:length(p.Results.cardinalMeridianAngles)
         fit(amacrine.density.supportMM.(p.Results.cardinalMeridianNames{mm})', amacrine.density.countsMMSq.(p.Results.cardinalMeridianNames{mm})', 'smoothingspline');
 end
 
-% Curcio & Allen 1990 examined the distribution of diamters of displaced
-% amacrine cells at a single eccentricity (5 mm temporal). Cells ranged in
-% size from 9-14 micrometers. We take the center of the plot (Figure 3,
-% right) to be 11 microns.
-%
-% Data from Figure 5B, Dacey 1990
-% Dacey measured the soma diameter in dopaminergic amacrine cells from 2-16 mm eccentricity
-% from the fovea in 112 M. nemestrina monkeys. The fit was extrapolated to 0mm eccentricity and
-% out to just over 17mm. Soma diameter ranged from 11.2 to 16.6 microns. The data collected came from
-% Dacey's best fit line which had a weak positive significant correlation (P<.02).
+% Dacey measured the soma diameter in dopaminergic amacrine cells from 2-16
+% mm eccentricity from the fovea in 112 M. nemestrina monkeys. The fit was
+% extrapolated to 0mm eccentricity and out to just over 17mm. Soma diameter
+% ranged from 11.2 to 16.6 microns. The data collected came from Dacey's
+% best fit line which had a weak positive significant correlation (p <.02).
 % 
-% Dacey, Dennis M. "The dopaminergic amacrine cell." Journal of Comparative Neurology 301.3 (1990): 461-489.
+%   Dacey, Dennis M. "The dopaminergic amacrine cell." Journal of
+%   Comparative Neurology 301.3 (1990): 461-489.
 %
+% Digitzed the line fit to the data in Figure:
 amacrine.diameter.supportMM = [0, 0.87, 1.68, 2.80, 3.76, 4.74, 5.86, 6.68, 7.36, 8.19, 8.71, 9.45, 9.97, 10.67, 11.45, 12.39, 13.47, 14.5, 15.62, 16.54, 17.82];
 amacrine.diameter.sizeMM = [.01259, .01266, .01274, .01286, .01303, .0132, .01324, .01332, .01336, .01335, .01353, .01361, .01365, .01373, .01381, .01394, .01402, .01419, .01423, .01439, .01452];
-amacrine.diameter.fitMM = @(x) 0.011;
-% WITH NEW DATA FROM DACEY 1990 WE DONT NEED THE LAST LINE HERE I THINK - WE NEED A SPLINE FIT - OR SHOULD WE ADD CURCIO TO DACEY
+amacrine.diameter.fitMM = fit(amacrine.diameter.supportMM',amacrine.diameter.sizeMM','smoothingspline');
 
 
 %% Parasol RGCs
@@ -106,23 +102,23 @@ amacrine.diameter.fitMM = @(x) 0.011;
 
 % Parasol proportion of all retinal ganglion cells Data from Silviera et
 % al. 1991, Figure 17
-parasol.proportion.supportMM.nasal = [1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
-parasol.proportion.value.nasal = [.098, .0964, nan, nan, nan, .0758, .095, .1174, .1398, .1918, .2078, .1599, .1983, .2032, .2455, .2687, .1993];
-parasol.proportion.supportMM.temporal = [0 1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
-parasol.proportion.value.temporal = [.066, .0844, .0909, .0845, .0885, .1054, .1086, .0951, .0927, .0856, .0569, .0297, .0498, nan, nan, nan, nan];
-parasol.proportion.supportMM.superior = [.96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
-parasol.proportion.value.superior = [.058, .0471, .0448, .0568, .0791, .0808, .0857, .0938, .0923, .0853, .1044, .1148, .1332, .119, .0993];
-parasol.proportion.supportMM.inferior = [.96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
-parasol.proportion.value.inferior = [.0573, .0558, .0718, .056, .0696, .0872, .0881, .1001, .0828, .094, .0774, .0942, .0681, .0468, nan];
+parasolMacaque.proportion.supportMM.nasal = [1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
+parasolMacaque.proportion.value.nasal = [.098, .0964, nan, nan, nan, .0758, .095, .1174, .1398, .1918, .2078, .1599, .1983, .2032, .2455, .2687, .1993];
+parasolMacaque.proportion.supportMM.temporal = [0 1.06, 2.07, 3.12, 4.12, 5.09, 6.17, 7.19, 8.22, 9.2, 10.24, 11.26, 12.24, 13.31, 14.32, 15.32, 16.42, 17.39];
+parasolMacaque.proportion.value.temporal = [.066, .0844, .0909, .0845, .0885, .1054, .1086, .0951, .0927, .0856, .0569, .0297, .0498, nan, nan, nan, nan];
+parasolMacaque.proportion.supportMM.superior = [.96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
+parasolMacaque.proportion.value.superior = [.058, .0471, .0448, .0568, .0791, .0808, .0857, .0938, .0923, .0853, .1044, .1148, .1332, .119, .0993];
+parasolMacaque.proportion.supportMM.inferior = [.96, 1.99, 2.98, 3.93, 4.93, 5.99, 6.87, 7.94, 8.89, 9.88, 10.92, 11.91, 12.9, 13.89, 14.92];
+parasolMacaque.proportion.value.inferior = [.0573, .0558, .0718, .056, .0696, .0872, .0881, .1001, .0828, .094, .0774, .0942, .0681, .0468, nan];
 
 % Obtain a spline fit to the parasol densities
 for mm = 1:length(p.Results.cardinalMeridianAngles)
-    nonNanSupportIdx = ~isnan(parasol.proportion.value.(p.Results.cardinalMeridianNames{mm}));
-    tmpSupport = parasol.proportion.supportMM.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)';
-    parasol.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = ...
+    nonNanSupportIdx = ~isnan(parasolMacaque.proportion.value.(p.Results.cardinalMeridianNames{mm}));
+    tmpSupport = parasolMacaque.proportion.supportMM.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)';
+    parasolMacaque.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = ...
         fit( [0; tmpSupport], ...        
         [0; totalRGC.density.fitMMSq.(p.Results.cardinalMeridianNames{mm})(tmpSupport)' .* ...
-        parasol.proportion.value.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)'], ...
+        parasolMacaque.proportion.value.(p.Results.cardinalMeridianNames{mm})(nonNanSupportIdx)'], ...
         'smoothingspline');
 end
 
@@ -215,13 +211,28 @@ midget.diameter.sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315];
 % Obtain a spline fit
 midget.diameter.fitMM = fit(midget.diameter.supportMM', midget.diameter.sizeMM', 'smoothingspline');
 
-% Figure prep
+
+%% Infer parasol densities
+% We have solid measurements of total RGC density and a solid estimate of
+% midget RGC density. The only parasol density measurements are from
+% macaque. We assume that:
+%   densityParasol = densityTotalRGC - densityMidget - densityBistratified
+for mm = 1:length(p.Results.cardinalMeridianAngles)
+    parasol.density.fitMMSq.(p.Results.cardinalMeridianNames{mm}) = @(x) totalRGC.density.fitMMSq.(p.Results.cardinalMeridianNames{mm})(x)- ...
+        midget.density.fitMMSq.(p.Results.cardinalMeridianNames{mm})(x) - ...
+        bistratified.density.fitMMSq.(p.Results.cardinalMeridianNames{mm})(x);
+end
+
+
+
+
+%% Figure prep
 figure
 supportMM = 0:0.01:6;
 
 % Plot counts
 subplot(1,2,1)
-plot(supportMM, totalRGC.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM))
+plot(supportMM, totalRGC.density.fitMMSq.temporal(supportMM))
 hold on
 plot(supportMM, midget.density.fitMMSq.temporal(supportMM))
 plot(supportMM, parasol.density.fitMMSq.temporal(supportMM))
@@ -230,6 +241,7 @@ plot(supportMM, amacrine.density.fitMMSq.temporal(supportMM))
 plot(supportMM, midget.density.fitMMSq.temporal(supportMM) + parasol.density.fitMMSq.temporal(supportMM) + bistratified.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM),'xr')
 xlabel('eccentricity [mm retina]');
 ylabel('density [counts / sq mm]');
+legend({'Curcio totalRGC','midget','parasol','bistratified','amacrine','model total all cells'});
 
 % Volume of a sphere given diameter
 sVol = @(d) 4/3*pi*(d./2).^3;
