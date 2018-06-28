@@ -246,18 +246,26 @@ legend({'Curcio totalRGC','midget','parasol','bistratified','amacrine','model to
 % Volume of a sphere given diameter
 sVol = @(d) 4/3*pi*(d./2).^3;
 
-% Packing density of spheres. 
-%   https://en.wikipedia.org/wiki/Sphere_packing
-% Basically, we will want to inflate volume by about 25% to account for the
-% void space between backed spheres.
+% Packing density of spheres
+% We model the cells as spheres. For a single sphere size, the densest
+% possible packing is Keppler's limit of ~0.74. In the RGC there are
+% multiple cell classes. Except in the far periphery the two most numerous
+% types of cells are the midget and parasol. If smaller cells are more
+% numerous than larger cells, it is possible in principle to pack small
+% cells into the spaces between larger cells, and achieve a density higher
+% than Kepler's limit. When the ratio of the smaller to larger cell is
+% greater than ~0.41, then the smaller is too large to pack into the
+% larger. This is the situation we face in this model, so we assume
+% Keppler's limit for sphere packing.
+spherePackDensity = 0.74048048969;
 
 
 % Plot volume
 subplot(1,2,2)
-volumeProfile = amacrine.density.fitMMSq.temporal(supportMM) .* sVol(amacrine.diameter.fitMM(supportMM)) + ...
+volumeProfile = (amacrine.density.fitMMSq.temporal(supportMM) .* sVol(amacrine.diameter.fitMM(supportMM)) + ...
     parasol.density.fitMMSq.temporal(supportMM) .* sVol(parasol.diameter.fitMM(supportMM)) + ...
     bistratified.density.fitMMSq.temporal(supportMM) .* sVol(bistratified.diameter.fitMM(supportMM)) + ...
-    midget.density.fitMMSq.temporal(supportMM) .* sVol(midget.diameter.fitMM(supportMM));
+    midget.density.fitMMSq.temporal(supportMM) .* sVol(midget.diameter.fitMM(supportMM))) ./ spherePackDensity;
 xlabel('eccentricity [mm retina]');
 ylabel('layer thickness [mm]]');
 
@@ -304,3 +312,4 @@ opticDiscIndices = findOpticDiscPositions(regularSupportPosDegRetina, polarAngle
 vectorOut = vectorIn;
 vectorOut(opticDiscIndices) = 0;
 end
+
