@@ -259,7 +259,6 @@ sVol = @(d) 4/3*pi*(d./2).^3;
 % Keppler's limit for sphere packing.
 spherePackDensity = 0.74048048969;
 
-
 % Plot volume
 subplot(1,2,2)
 volumeProfile = (amacrine.density.fitMMSq.temporal(supportMM) .* sVol(amacrine.diameter.fitMM(supportMM)) + ...
@@ -270,6 +269,18 @@ xlabel('eccentricity [mm retina]');
 ylabel('layer thickness [mm]]');
 
 plot(supportMM, volumeProfile);
+
+
+%% Curcio RGC and IPL thickness measurements
+empiricalThickness.RGC.supportMM.temporal = [];
+empiricalThickness.RGC.thickMM.temporal = [];
+empiricalThickness.RGC.supportMM.nasal = [];
+empiricalThickness.RGC.thickMM.nasal = [];
+empiricalThickness.IPL.supportMM.temporal = [];
+empiricalThickness.IPL.thickMM.temporal = [];
+empiricalThickness.IPL.supportMM.nasal = [];
+empiricalThickness.IPL.thickMM.nasal = [];
+
 
 end % rgcThickness function
 
