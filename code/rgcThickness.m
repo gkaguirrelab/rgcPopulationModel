@@ -28,6 +28,12 @@ function rgcThickness(varargin )
 % Examples:
 %
 
+% Things for GKA to check out:
+%   - See what x-axis scale factor would be required to bring our
+%   thickness model into alignment with the Curcio 2011 data
+%   - See if adding a higher packing density in the periphery fixes the
+%   plateua
+
 
 %% input parser
 p = inputParser;
@@ -134,7 +140,7 @@ end
 % accordigly.
 parasol.diameter.supportMM = [0.53, 1.07, 1.47, 1.96, 2.5, 3.1, 3.5, 4.0, 4.55, 5.0, 5.53, 6.0, 6.47, 7.0, 7.53, 8.05, 9.0, 9.65, 10.33, 11.4, 12.66, 13.63, 14.21];
 parasol.diameter.sizeMM = 1.35.*[0.0153, 0.017, 0.0186, 0.0203, 0.02187, 0.0196, 0.0246, 0.0252, 0.027, 0.0282, 0.0298, 0.0304, 0.0316, 0.0323, 0.0328, 0.0317, 0.037, 0.0351, 0.0327, 0.0321, 0.0306, 0.0302, 0.02713];
-parasol.diameter.fitMM = fit(parasol.diameter.supportMM', parasol.diameter.sizeMM','smoothingspline');
+parasol.diameter.fitMM = fit(parasol.diameter.supportMM', parasol.diameter.sizeMM','poly1');
 
 
 %% Bistratified RGCs
@@ -178,7 +184,7 @@ end
 %
 % We model the cell body diameter as constant as a function of
 % eccentricity.
-bistratified.diameter.fitMM = @(x) 0.0189;
+bistratified.diameter.fitMM = @(x) repmat(0.0189,size(x));
 
 
 %% Midget RGCs
@@ -209,7 +215,7 @@ midget.diameter.supportMM = convert_degVisual_to_mmRetina(midget.diameter.suppor
 midget.diameter.sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315];
 
 % Obtain a spline fit
-midget.diameter.fitMM = fit(midget.diameter.supportMM', midget.diameter.sizeMM', 'smoothingspline');
+midget.diameter.fitMM = fit(midget.diameter.supportMM', midget.diameter.sizeMM', 'poly1');
 
 
 %% Infer parasol densities
@@ -260,7 +266,7 @@ figure
 supportMM = 0:0.01:6;
 
 % Plot counts
-subplot(1,2,1)
+subplot(1,3,1)
 plot(supportMM, totalRGC.density.fitMMSq.temporal(supportMM))
 hold on
 plot(supportMM, midget.density.fitMMSq.temporal(supportMM))
@@ -272,8 +278,23 @@ xlabel('eccentricity [mm retina]');
 ylabel('density [counts / sq mm]');
 legend({'Curcio totalRGC','midget','parasol','bistratified','amacrine','model total all cells'});
 
+% Plot cell volumes
+
 % Volume of a sphere given diameter
 sVol = @(d) 4/3*pi*(d./2).^3;
+
+subplot(1,3,2)
+plot(supportMM, sVol(midget.diameter.fitMM(supportMM)))
+hold on
+plot(supportMM, sVol(parasol.diameter.fitMM(supportMM)))
+plot(supportMM, sVol(bistratified.diameter.fitMM(supportMM)))
+plot(supportMM, sVol(amacrine.diameter.fitMM(supportMM)))
+xlabel('eccentricity [mm retina]');
+ylabel('individual cell volume [mm^3]');
+legend({'midget','parasol','bistratified','amacrine'});
+
+
+% Plot thickness
 
 % Packing density of spheres
 % We model the cells as spheres. For a single sphere size, the densest
@@ -288,12 +309,18 @@ sVol = @(d) 4/3*pi*(d./2).^3;
 % Keppler's limit for sphere packing.
 spherePackDensity = 0.74048048969;
 
-% Plot volume
-subplot(1,2,2)
+% Need to assume a density higher than 1 to match Curcio's thickness
+% measurements. This suggests that the Curcio measurements must have been
+% subjected to some cell shrinkage.
+spherePackDensity = 1.1;
+
+
+subplot(1,3,3)
 volumeProfile = (amacrine.density.fitMMSq.temporal(supportMM) .* sVol(amacrine.diameter.fitMM(supportMM)) + ...
     parasol.density.fitMMSq.temporal(supportMM) .* sVol(parasol.diameter.fitMM(supportMM)) + ...
     bistratified.density.fitMMSq.temporal(supportMM) .* sVol(bistratified.diameter.fitMM(supportMM)) + ...
     midget.density.fitMMSq.temporal(supportMM) .* sVol(midget.diameter.fitMM(supportMM))) ./ spherePackDensity;
+
 plot(supportMM, volumeProfile);
 hold on
 plot(empiricalThickness.RGC.supportMM.temporal, empiricalThickness.RGC.thickMM.temporal, '*r');
