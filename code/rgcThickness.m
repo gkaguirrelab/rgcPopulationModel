@@ -117,14 +117,6 @@ legend({'midget','parasol','bistratified','amacrine'});
 
 
 % Plot thickness
-
-
-% Need to assume a density higher than 1 to match Curcio's thickness
-% measurements. This suggests that the Curcio measurements must have been
-% subjected to some cell shrinkage.
-spherePackDensity = 1.1;
-
-
 subplot(1,3,3)
 
 plot(supportMM, volumeProfile);
