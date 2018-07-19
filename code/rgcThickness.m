@@ -124,7 +124,7 @@ legend({'midget','parasol','bistratified','amacrine'});
 % Plot thickness
 subplot(1,3,3)
 
-plot(supportMM, volumeProfile);
+plot(supportMM, calcRGCthickness(fParams(1),fParams(2)));
 hold on
 plot(rgcLayer.supportMM.temporal, rgcLayer.thickMM.temporal, '*r');
 legend({'Model thickness','Curcio RGC measure'});
