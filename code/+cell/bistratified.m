@@ -1,6 +1,10 @@
 function bistratified = bistratified( cardinalMeridianAngles, cardinalMeridianNames, totalRGC )
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
+% Model of volume of bistratfiied ganglion cells in the RGC layer.
+%   Digitized data from Dacey's publications concerning morphology of 
+%   bistratified ganglion cells allows us to calculate how much the volume
+%   of bistratified cells contributes to the overall RGC layer thickness
+%   from data concerning bistratified cells density varying with eccentricity
+%   across all meridians, and the cells' mean size.
 
 
 
