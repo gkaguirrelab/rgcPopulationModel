@@ -85,6 +85,11 @@ myObj = @(x) sqrt(sum((rgcLayer.thickMM.temporal' - calcRGCthickness(x(1),x(2)))
 
 [fParams, fVal] = fmincon(myObj,[1 1]);
 
+figure
+plot(supportMM,rgcLayer.thickMM.temporal,'-k');
+hold on
+plot(supportMM,calcRGCthickness(fParams(1),fParams(2)),'*r');
+
 
 %% Figure prep
 figure
