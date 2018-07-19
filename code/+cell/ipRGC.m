@@ -1,21 +1,28 @@
 function ipRGC = ipRGC( cardinalMeridianAngles, cardinalMeridianNames )
 
 %% ipRGCs
-% Citation info here
+%   Dacey, Dennis M., et al. "Melanopsin-expressing ganglion cells in primate retina 
+%   signal colour and irradiance and project to the LGN." Nature 433.7027 (2005): 749.
+%
+% Data from staining instrinscially photosensitive retinal ganglion cells in human retinas. 
+% Note that 60% of all ipRGCs have outer stratifying dendritic fields, and 40% of these outer stratifying 
+% ipRGCs have their cell bodies lying within the inner plexiform layer. Thus, 24% of the total cells should not 
+% be counted when calculating the thickness of the RGC layer.
 
+% Density info
 for mm = 1:length(cardinalMeridianAngles)
-    % Data from Curcio & Allen 1990, Figure 10, used for all meridians
-    ipRGC.density.supportMM.(cardinalMeridianNames{mm}) = [0, 0.11, 0.23, 0.4, 0.65, 0.86, 1.45, 2.46, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.6, 12.6, 13.6, 14.6, 15.6, 16.6, 17.7, 18.65, 19.65];
-    ipRGC.density.countsMMSq.(cardinalMeridianNames{mm}) = [73, 124, 317, 542, 689, 813, 1052, 1112, 1159, 1187, 1146, 1069, 992, 942, 888, 848, 798, 767, 731, 699, 677, 650, 642, 652, 676];
+    % Data from Dacey 2005, Figure 1G, used for all meridians
+    ipRGC.density.supportMM.(cardinalMeridianNames{mm}) = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    ipRGC.density.countsMMSq.(cardinalMeridianNames{mm}) = [21.06, 15.36, 12.02 8.27, 5.95, 8.46, 5.87, 5.96, 5.31, 5.78, 4.99, 4.67, 7.55, 4.86, 6.21, 4.03];
     % Obtain a spline fit to the ipRGC densities
     ipRGC.density.fitMMSq.(cardinalMeridianNames{mm}) = ...
         fit(ipRGC.density.supportMM.(cardinalMeridianNames{mm})', ipRGC.density.countsMMSq.(cardinalMeridianNames{mm})', 'smoothingspline');
 end
 
 % Size info here
-% Digitzed the line fit to the data in Figure:
-ipRGC.diameter.supportMM = [0, 0.87, 1.68, 2.80, 3.76, 4.74, 5.86, 6.68, 7.36, 8.19, 8.71, 9.45, 9.97, 10.67, 11.45, 12.39, 13.47, 14.5, 15.62, 16.54, 17.82];
-ipRGC.diameter.sizeMM = [.01259, .01266, .01274, .01286, .01303, .0132, .01324, .01332, .01336, .01335, .01353, .01361, .01365, .01373, .01381, .01394, .01402, .01419, .01423, .01439, .01452];
+% 
+ipRGC.diameter.supportMM = [];
+ipRGC.diameter.sizeMM = [];
 ipRGC.diameter.fitMM = fit(ipRGC.diameter.supportMM',ipRGC.diameter.sizeMM','smoothingspline');
 
 end
