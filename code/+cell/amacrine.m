@@ -23,7 +23,7 @@ end
 % mm eccentricity from the fovea in 112 M. nemestrina monkeys. The fit was
 % extrapolated to 0mm eccentricity and out to just over 17mm. Soma diameter
 % ranged from 11.2 to 16.6 microns. The data collected came from Dacey's
-% best fit line which had a weak positive significant correlation (p <.02).
+% best fit line which had a weakly significant positive correlation (p <.02).
 % 
 %   Dacey, Dennis M. "The dopaminergic amacrine cell." Journal of
 %   Comparative Neurology 301.3 (1990): 461-489.
