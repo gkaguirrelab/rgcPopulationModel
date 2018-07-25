@@ -25,8 +25,25 @@ for mm = 1:length(cardinalMeridianAngles)
 end
 
 % Size info here
+% Data collected by combining reported information on human ipRGCs from 
+% Dkhissi-Benyahya and Do each of which reported varying scales of soma 
+% diameter for melanopsin containing ganglion cells. The range of 15-20um 
+% in diameter, reported by Dkhissi-Benyahya agreed with Do's report for 
+% mouse retina. However, Do also provided measurements of 50um soma diameter
+% for humans without any detail on how this measurement was made or raw data.
+% Thus, we utilized Dkhissi-Benyahya's report, taking its agreement with Do's
+% report on rat ipRGCs to be a source of corroboration. Measurements were not
+% given for how soma size varies across eccentricity.
+
+% Dkhissi-Benyahya, Ouria, et al. "Immunohistochemical evidence of a melanopsin 
+% cone in human retina." Investigative ophthalmology & visual science 47.4 (2006): 
+% 1636-1641.
+%
+% Do, Michael Tri Hoang, and King-Wai Yau. "Intrinsically photosensitive retinal 
+% ganglion cells." Physiological reviews 90.4 (2010): 1547-1581.
+%
 ipRGC.diameter.supportMM = [];
-ipRGC.diameter.sizeMM = [];
+ipRGC.diameter.sizeMM = [.017];
 ipRGC.diameter.fitMM = fit(ipRGC.diameter.supportMM',ipRGC.diameter.sizeMM','smoothingspline');
 
 end
