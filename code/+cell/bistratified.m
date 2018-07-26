@@ -19,8 +19,8 @@ function bistratified = bistratified( cardinalMeridianAngles, cardinalMeridianNa
 % Dacey provided values for the temporal retina; we assume these values
 % hold for all meridians
 for mm = 1:length(cardinalMeridianAngles)
-    bistratified.proportion.supportMM.(cardinalMeridianNames{mm}) = [.97, 1.96, 2.91, 3.92, 4.91, 5.92, 6.89, 7.84, 8.85, 9.86, 10.89, 11.9, 12.91, 13.84, 14.91];
-    bistratified.proportion.value.(cardinalMeridianNames{mm}) = [.0135, .0168, .0202, .0241, .0284, .0324, .0364, .0403, .0447, .0485, .0538, .0573, .0603, .0641, .0662];
+    bistratified.proportion.supportMM.(cardinalMeridianNames{mm}) = [0, .97, 1.96, 2.91, 3.92, 4.91, 5.92, 6.89, 7.84, 8.85, 9.86, 10.89, 11.9, 12.91, 13.84, 14.91];
+    bistratified.proportion.value.(cardinalMeridianNames{mm}) = [0, .0135, .0168, .0202, .0241, .0284, .0324, .0364, .0403, .0447, .0485, .0538, .0573, .0603, .0641, .0662];
 end
 
 % Obtain a spline fit to the bistratified densities

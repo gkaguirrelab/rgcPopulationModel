@@ -47,6 +47,7 @@ totalRGC = cell.totalRGC(p.Results.cardinalMeridianAngles, p.Results.cardinalMer
 midget = cell.midget(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames);
 bistratified = cell.bistratified(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames, totalRGC);
 parasol = cell.parasol(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames, totalRGC, midget, bistratified);
+ipRGC = cell.ipRGC(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames);
 
 % Obtain the empirical thickness measurements
 rgcLayer = layer.rgc(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames);
@@ -78,7 +79,8 @@ calcRGCthickness = @(xScale,yScale) ((...
     amacrine.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(amacrine.diameter.fitMM(supportMM.*xScale)) + ...
     parasol.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(parasol.diameter.fitMM(supportMM.*xScale)) + ...
     bistratified.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(bistratified.diameter.fitMM(supportMM.*xScale)) + ...
-    midget.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(midget.diameter.fitMM(supportMM.*xScale)) ...
+    midget.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(midget.diameter.fitMM(supportMM.*xScale)) + ...
+    ipRGC.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(ipRGC.diameter.fitMM(supportMM.*xScale)) ...
     ) .* yScale) ./ spherePackDensity;
 
 myObj = @(x) sqrt(sum((rgcLayer.thickMM.temporal' - calcRGCthickness(x(1),x(2))).^2));
@@ -102,10 +104,11 @@ plot(supportMM, midget.density.fitMMSq.temporal(supportMM))
 plot(supportMM, parasol.density.fitMMSq.temporal(supportMM))
 plot(supportMM, bistratified.density.fitMMSq.temporal(supportMM))
 plot(supportMM, amacrine.density.fitMMSq.temporal(supportMM))
-plot(supportMM, midget.density.fitMMSq.temporal(supportMM) + parasol.density.fitMMSq.temporal(supportMM) + bistratified.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM),'xr')
+plot(supportMM, ipRGC.density.fitMMSq.temporal(supportMM))
+plot(supportMM, midget.density.fitMMSq.temporal(supportMM) + parasol.density.fitMMSq.temporal(supportMM) + bistratified.density.fitMMSq.temporal(supportMM) +ipRGC.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM),'xr')
 xlabel('eccentricity [mm retina]');
 ylabel('density [counts / sq mm]');
-legend({'Curcio totalRGC','midget','parasol','bistratified','amacrine','model total all cells'});
+legend({'Curcio totalRGC','midget','parasol','bistratified','amacrine','ipRGC','model total all cells'});
 
 % Plot cell volumes
 
@@ -116,9 +119,10 @@ hold on
 plot(supportMM, sVol(parasol.diameter.fitMM(supportMM)))
 plot(supportMM, sVol(bistratified.diameter.fitMM(supportMM)))
 plot(supportMM, sVol(amacrine.diameter.fitMM(supportMM)))
+plot(supportMM, sVol(ipRGC.diameter.fitMM(supportMM)))
 xlabel('eccentricity [mm retina]');
 ylabel('individual cell volume [mm^3]');
-legend({'midget','parasol','bistratified','amacrine'});
+legend({'midget','parasol','bistratified','amacrine','ipRGC'});
 
 
 % Plot thickness
