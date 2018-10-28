@@ -1,8 +1,12 @@
-
-
-
 function rgc = rgc( cardinalMeridianAngles, cardinalMeridianNames )
+%
+%
+%
+%{
+    subjectAges = [40 44 51 52 54 57 57 65 66 71 73 76 80 83 84 85 88 92];
+    median(subjectAges)
 
+%}
 
 %% RGC and IPL thickness
 % Determined by 18 histologically sectioned maculas. Data from Curcio 2011,
@@ -14,7 +18,7 @@ function rgc = rgc( cardinalMeridianAngles, cardinalMeridianNames )
 %
 
 % Tissue shrinkage. The Curcio RGC/IPL layer thickness measurements were
-% subjected to a 29% reduction in size due to histological prep
+% subjected to a 29% reduction in size due to histological prep. 
 tissueShrinkage = 0.29;
 
 rgc.supportMM.temporal = [0, 0.09, 0.18, 0.26, 0.35, 0.4, 0.56, 0.69, 0.82, 0.91, 1.11, 1.26, 1.45, 1.7, 1.88, 2.06, 2.27, 2.48, 2.7, 2.94, 2.99];
