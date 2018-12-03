@@ -21,15 +21,19 @@ function bistratified = bistratified( cardinalMeridianAngles, cardinalMeridianNa
 for mm = 1:length(cardinalMeridianAngles)
     bistratified.proportion.supportMM.(cardinalMeridianNames{mm}) = [0, .97, 1.96, 2.91, 3.92, 4.91, 5.92, 6.89, 7.84, 8.85, 9.86, 10.89, 11.9, 12.91, 13.84, 14.91];
     bistratified.proportion.value.(cardinalMeridianNames{mm}) = [0, .0135, .0168, .0202, .0241, .0284, .0324, .0364, .0403, .0447, .0485, .0538, .0573, .0603, .0641, .0662];
+
+    % Convert retinal mm to degrees visual field
+    bistratified.proportion.supportDeg.(cardinalMeridianNames{mm}) = convert_mmRetina_to_degVisual(bistratified.proportion.supportMM.(cardinalMeridianNames{mm}), cardinalMeridianAngles(mm));
+    
 end
 
 % Obtain a spline fit to the bistratified densities
 for mm = 1:length(cardinalMeridianAngles)
     nonNanSupportIdx = ~isnan(bistratified.proportion.value.(cardinalMeridianNames{mm}));
-    tmpSupport = bistratified.proportion.supportMM.(cardinalMeridianNames{mm})(nonNanSupportIdx)';
-    bistratified.density.fitMMSq.(cardinalMeridianNames{mm}) = ...
+    tmpSupport = bistratified.proportion.supportDeg.(cardinalMeridianNames{mm})(nonNanSupportIdx)';
+    bistratified.density.fitDegSq.(cardinalMeridianNames{mm}) = ...
         fit( [0; tmpSupport], ...        
-        [0; totalRGC.density.fitMMSq.(cardinalMeridianNames{mm})(tmpSupport)' .* ...
+        [0; totalRGC.density.fitDegSq.(cardinalMeridianNames{mm})(tmpSupport)' .* ...
         bistratified.proportion.value.(cardinalMeridianNames{mm})(nonNanSupportIdx)'], ...
         'smoothingspline');
 end
@@ -48,7 +52,7 @@ end
 %
 % We model the cell body diameter as constant as a function of
 % eccentricity.
-bistratified.diameter.fitMM = @(x) repmat(0.0189,size(x));
+bistratified.diameter.fitDeg = @(x) repmat(0.0189,size(x));
 
 end
 

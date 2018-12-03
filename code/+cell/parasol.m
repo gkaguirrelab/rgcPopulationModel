@@ -43,9 +43,9 @@ function parasol = parasol( cardinalMeridianAngles, cardinalMeridianNames, total
 % macaque. We assume that:
 %   densityParasol = densityTotalRGC - densityMidget - densityBistratified
 for mm = 1:length(cardinalMeridianAngles)
-    parasol.density.fitMMSq.(cardinalMeridianNames{mm}) = @(x) totalRGC.density.fitMMSq.(cardinalMeridianNames{mm})(x')- ...
-        midget.density.fitMMSq.(cardinalMeridianNames{mm})(x') - ...
-        bistratified.density.fitMMSq.(cardinalMeridianNames{mm})(x');
+    parasol.density.fitDegSq.(cardinalMeridianNames{mm}) = @(x) totalRGC.density.fitDegSq.(cardinalMeridianNames{mm})(x')- ...
+        midget.density.fitDegSq.(cardinalMeridianNames{mm})(x') - ...
+        bistratified.density.fitDegSq.(cardinalMeridianNames{mm})(x');
 end
 
 
@@ -60,8 +60,9 @@ end
 % larger in the human than in the macaque. We scale up the diameter values
 % accordigly.
 parasol.diameter.supportMM = [0.53, 1.07, 1.47, 1.96, 2.5, 3.1, 3.5, 4.0, 4.55, 5.0, 5.53, 6.0, 6.47, 7.0, 7.53, 8.05, 9.0, 9.65, 10.33, 11.4, 12.66, 13.63, 14.21];
+parasol.diameter.supportDeg = convert_mmRetina_to_degVisual(parasol.diameter.supportMM, 180);
 parasol.diameter.sizeMM = 1.35.*[0.0153, 0.017, 0.0186, 0.0203, 0.02187, 0.0196, 0.0246, 0.0252, 0.027, 0.0282, 0.0298, 0.0304, 0.0316, 0.0323, 0.0328, 0.0317, 0.037, 0.0351, 0.0327, 0.0321, 0.0306, 0.0302, 0.02713];
-parasol.diameter.fitMM = fit(parasol.diameter.supportMM', parasol.diameter.sizeMM','poly1');
+parasol.diameter.fitDeg = fit(parasol.diameter.supportDeg', parasol.diameter.sizeMM','poly1');
 
 
 end

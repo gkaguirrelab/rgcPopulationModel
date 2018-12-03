@@ -21,15 +21,15 @@ ipl.thickMM.temporal = (1/(1-tissueShrinkage)).*[.00303, .00758, .01667, .02273,
 ipl.supportMM.nasal = [3, 2.86, 2.69, 2.55, 2.34, 2.13, 1.92, 1.69, 1.56, 1.34, 1.15, 0.84, 0.55, 0.37, 0.13, 0.06, 0];
 ipl.thickMM.nasal = (1/(1-tissueShrinkage)).*[.0303, .03182, .03182, .03182, .03333, .03485, .03636, .03788, .03939, .03939, .03788, .03485, .02879, .02121, .00909, .00455, .00303];
 
-% Tissue shrinkage. The Curcio RGC/IPL layer thickness measurements were
-% subjected to a 29% reduction in size due to histological prep
-tissueShrinkage = 0.29;
+% Convert mm to deg visual
+ipl.supportDeg.temporal = convert_mmRetina_to_degRetina(ipl.supportMM.temporal);
+ipl.supportDeg.nasal = convert_mmRetina_to_degRetina(ipl.supportMM.nasal);
 
 % Obtain a spline fit to the thickness measurements
 for mm = [1 3]
-    tmpSupport = ipl.supportMM.(cardinalMeridianNames{mm})';
+    tmpSupport = ipl.supportDeg.(cardinalMeridianNames{mm})';
     tmpVals = ipl.thickMM.(cardinalMeridianNames{mm})';
-    ipl.fitMM.(cardinalMeridianNames{mm}) = ...
+    ipl.fitDeg.(cardinalMeridianNames{mm}) = ...
         fit( tmpSupport, tmpVals, 'smoothingspline');
 end
 

@@ -19,9 +19,14 @@ for mm = 1:length(cardinalMeridianAngles)
     % Data from Dacey 2005, Figure 1G, used for all meridians
     ipRGC.density.supportMM.(cardinalMeridianNames{mm}) = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
     ipRGC.density.countsMMSq.(cardinalMeridianNames{mm}) = ipRGCpropInRGCLayer.*[0, 21.06, 15.36, 12.02 8.27, 5.95, 8.46, 5.87, 5.96, 5.31, 5.78, 4.99, 4.67, 7.55, 4.86, 6.21, 4.03];
+
+    % Convert retinal mm to visual degrees
+    ipRGC.density.supportDeg.(cardinalMeridianNames{mm}) = convert_mmRetina_to_degVisual(ipRGC.density.supportMM.(cardinalMeridianNames{mm}), 180);
+    ipRGC.density.countsDegSq.(cardinalMeridianNames{mm}) = ipRGC.density.countsMMSq.(cardinalMeridianNames{mm}) .* calc_mmSqRetina_per_degSqVisual(ipRGC.density.supportDeg.(cardinalMeridianNames{mm}), 180);
+    
     % Obtain a spline fit to the ipRGC densities
-    ipRGC.density.fitMMSq.(cardinalMeridianNames{mm}) = ...
-        fit(ipRGC.density.supportMM.(cardinalMeridianNames{mm})', ipRGC.density.countsMMSq.(cardinalMeridianNames{mm})', 'smoothingspline');
+    ipRGC.density.fitDegSq.(cardinalMeridianNames{mm}) = ...
+        fit(ipRGC.density.supportDeg.(cardinalMeridianNames{mm})', ipRGC.density.countsDegSq.(cardinalMeridianNames{mm})', 'smoothingspline');
 end
 
 % Size info here
@@ -42,7 +47,7 @@ end
 %   Do, Michael Tri Hoang, and King-Wai Yau. "Intrinsically photosensitive
 %   retinal ganglion cells." Physiological reviews 90.4 (2010): 1547-1581.
 %
-ipRGC.diameter.fitMM = @(x) repmat(0.017,size(x));
+ipRGC.diameter.fitDeg = @(x) repmat(0.017,size(x));
 
 end
 

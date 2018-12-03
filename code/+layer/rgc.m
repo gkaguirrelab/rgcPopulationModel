@@ -26,12 +26,16 @@ rgc.thickMM.temporal = (1/(1-tissueShrinkage)).*[.00455, .00455, .01212, .02273,
 rgc.supportMM.nasal = [3, 2.88, 2.72, 2.54, 2.35, 2.15, 1.99, 1.86, 1.68, 1.53, 1.33, 1.14, 1.03, 0.87, 0.7, 0.6, 0.48, 0.31, 0.19, 0.11, 0.05, 0];
 rgc.thickMM.nasal = (1/(1-tissueShrinkage)).*[.02121, .02121, .02273, .02576, .0303, .03485, .03788, .04394, .05, .05455, .07212, .06818, .07273, .07273, .07121, .0697, .05909, .05303, .03939, .0197, .00909, .00455];
 
+% Convert from mm to visual deg
+rgc.supportDeg.temporal = convert_mmRetina_to_degRetina(rgc.supportMM.temporal);
+rgc.supportDeg.nasal = convert_mmRetina_to_degRetina(rgc.supportMM.nasal);
+
 
 % Obtain a spline fit to the thickness measurements
 for mm = [1 3]
-    tmpSupport = rgc.supportMM.(cardinalMeridianNames{mm})';
+    tmpSupport = rgc.supportDeg.(cardinalMeridianNames{mm})';
     tmpVals = rgc.thickMM.(cardinalMeridianNames{mm})';
-    rgc.fitMM.(cardinalMeridianNames{mm}) = ...
+    rgc.fitDeg.(cardinalMeridianNames{mm}) = ...
         fit( tmpSupport, tmpVals, 'smoothingspline');
 end
 

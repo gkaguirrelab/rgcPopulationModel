@@ -1,9 +1,9 @@
-function rgcThickness(varargin )
+function fVal=rgcThickness(varargin )
 % Caclulates RGC layer thickness by reference to constituent cell classes
 %
 % Description:
 %   We aim to create a model of the thickness of the retinal ganglion cell
-%   layer and how it vaires with eccentricity, comparing our estimations to
+%   layer and how it varies with eccentricity, comparing our estimations to
 %   reports from histology and OCT scanned images. We will calculate the
 %   thickness of the RGC layer using data from histology on the population
 %   of midget, parasol, and bistratified ganglion cells as well as
@@ -26,8 +26,13 @@ function rgcThickness(varargin )
 % Outputs:
 %
 % Examples:
-%
-
+%{
+    % Search across midget fraction linking params to obtain the best model
+    % fit to tissue thickness
+    myObj = @(p) rgcThickness('midgetLinkingFuncParams',p,'showPlots',false);
+    x0=[12.0290    1.7850];
+    [x,fval]=fmincon(myObj,x0)
+%}
 
 %% input parser
 p = inputParser;
@@ -36,6 +41,12 @@ p = inputParser;
 p.addParameter('polarAngle',180,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
+%p.addParameter('midgetLinkingFuncParams',[12.0290    1.7850],@isnumeric); % Dacey model
+%p.addParameter('midgetLinkingFuncParams',[0.4476   48.2818],@isnumeric); % Parameters thata best fit thickness when zero tissue shrinkage is assumed
+p.addParameter('midgetLinkingFuncParams',[2.1983    1.2463],@isnumeric); % Current best linking function params from the Barnett & Aguirre model
+%p.addParameter('midgetLinkingFuncParams',[0.2812   27.7541],@isnumeric); % Parameters thata best fit thickness when tissue shrinkage is assumed
+
+p.addParameter('showPlots',true,@islogical);
 
 % parse
 p.parse(varargin{:})
@@ -44,7 +55,7 @@ p.parse(varargin{:})
 % Obtain the cell population components from the individual functions
 amacrine = cell.amacrine(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames);
 totalRGC = cell.totalRGC(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames);
-midget = cell.midget(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames);
+midget = cell.midget(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames,p.Results.midgetLinkingFuncParams);
 bistratified = cell.bistratified(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames, totalRGC);
 parasol = cell.parasol(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames, totalRGC, midget, bistratified);
 ipRGC = cell.ipRGC(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames);
@@ -71,74 +82,69 @@ sVol = @(d) 4/3*pi*(d./2).^3;
 % Keppler's limit for sphere packing.
 spherePackDensity = 0.74048048969;
 
+
+% Pick the meridian to model
+meridian = 'temporal';
+
 % Set the support to be the locations of the Curcio 2011 RGC thickness
 % measurements
-supportMM = rgcLayer.supportMM.temporal';
+supportDeg = rgcLayer.supportDeg.(meridian)';
 
 calcRGCthickness = @(xScale,yScale) ((...
-    amacrine.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(amacrine.diameter.fitMM(supportMM.*xScale)) + ...
-    parasol.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(parasol.diameter.fitMM(supportMM.*xScale)) + ...
-    bistratified.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(bistratified.diameter.fitMM(supportMM.*xScale)) + ...
-    midget.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(midget.diameter.fitMM(supportMM.*xScale)) + ...
-    ipRGC.density.fitMMSq.temporal(supportMM.*xScale) .* sVol(ipRGC.diameter.fitMM(supportMM.*xScale)) ...
-    ) .* yScale) ./ spherePackDensity;
+    amacrine.density.fitDegSq.(meridian)(supportDeg.*xScale) .* sVol(amacrine.diameter.fitDeg(supportDeg.*xScale)) + ...
+    parasol.density.fitDegSq.(meridian)(supportDeg.*xScale) .* sVol(parasol.diameter.fitDeg(supportDeg.*xScale)) + ...
+    bistratified.density.fitDegSq.(meridian)(supportDeg.*xScale) .* sVol(bistratified.diameter.fitDeg(supportDeg.*xScale)) + ...
+    midget.density.fitDegSq.(meridian)(supportDeg.*xScale) .* sVol(midget.diameter.fitDeg(supportDeg.*xScale)) + ...
+    ipRGC.density.fitDegSq.(meridian)(supportDeg.*xScale) .* sVol(ipRGC.diameter.fitDeg(supportDeg.*xScale)) ...
+    ) .* yScale) ./ spherePackDensity ./ calc_mmSqRetina_per_degSqVisual(supportDeg,180);
 
-myObj = @(x) sqrt(sum((rgcLayer.thickMM.temporal' - calcRGCthickness(x(1),x(2))).^2));
+myObj = @(x) sqrt(sum((rgcLayer.thickMM.(meridian)' - calcRGCthickness(x(1),x(2))).^2));
 
 [fParams, fVal] = fmincon(myObj,[1 1]);
 
-figure
-plot(supportMM,rgcLayer.thickMM.temporal,'-k');
-hold on
-plot(supportMM,calcRGCthickness(fParams(1),fParams(2)),'*r');
-
-
 %% Figure prep
-figure
 
-% Plot counts
-subplot(1,3,1)
-plot(supportMM, totalRGC.density.fitMMSq.temporal(supportMM))
-hold on
-plot(supportMM, midget.density.fitMMSq.temporal(supportMM))
-plot(supportMM, parasol.density.fitMMSq.temporal(supportMM))
-plot(supportMM, bistratified.density.fitMMSq.temporal(supportMM))
-plot(supportMM, amacrine.density.fitMMSq.temporal(supportMM))
-plot(supportMM, ipRGC.density.fitMMSq.temporal(supportMM))
-plot(supportMM, midget.density.fitMMSq.temporal(supportMM) + parasol.density.fitMMSq.temporal(supportMM) + bistratified.density.fitMMSq.temporal(supportMM) +ipRGC.density.fitMMSq.temporal(supportMM) + amacrine.density.fitMMSq.temporal(supportMM),'xr')
-xlabel('eccentricity [mm retina]');
-ylabel('density [counts / sq mm]');
-legend({'Curcio totalRGC','midget','parasol','bistratified','amacrine','ipRGC','model total all cells'});
-
-% Plot cell volumes
-
-
-subplot(1,3,2)
-plot(supportMM, sVol(midget.diameter.fitMM(supportMM)))
-hold on
-plot(supportMM, sVol(parasol.diameter.fitMM(supportMM)))
-plot(supportMM, sVol(bistratified.diameter.fitMM(supportMM)))
-plot(supportMM, sVol(amacrine.diameter.fitMM(supportMM)))
-plot(supportMM, sVol(ipRGC.diameter.fitMM(supportMM)))
-xlabel('eccentricity [mm retina]');
-ylabel('individual cell volume [mm^3]');
-legend({'midget','parasol','bistratified','amacrine','ipRGC'});
-
-
-% Plot thickness
-subplot(1,3,3)
-
-plot(supportMM, calcRGCthickness(fParams(1),fParams(2)));
-hold on
-plot(rgcLayer.supportMM.temporal, rgcLayer.thickMM.temporal, '*r');
-legend({'Model thickness','Curcio RGC measure'});
-xlabel('eccentricity [mm retina]');
-ylabel('layer thickness [mm]]');
-
-
-
+if p.Results.showPlots
+    figure
+    
+    % Plot counts
+    subplot(2,2,1)
+    %plot(supportDeg, totalRGC.density.fitDegSq.(meridian)(supportDeg))
+    plot(supportDeg, midget.density.fitDegSq.(meridian)(supportDeg))
+    hold on
+    plot(supportDeg, parasol.density.fitDegSq.(meridian)(supportDeg))
+    plot(supportDeg, bistratified.density.fitDegSq.(meridian)(supportDeg))
+    plot(supportDeg, amacrine.density.fitDegSq.(meridian)(supportDeg))
+    plot(supportDeg, ipRGC.density.fitDegSq.(meridian)(supportDeg))
+    %plot(supportDeg, midget.density.fitDegSq.(meridian)(supportDeg) + parasol.density.fitDegSq.(meridian)(supportDeg) + bistratified.density.fitDegSq.(meridian)(supportDeg) +ipRGC.density.fitDegSq.(meridian)(supportDeg) + amacrine.density.fitDegSq.(meridian)(supportDeg),'xr')
+    xlabel('eccentricity [deg visual]');
+    ylabel('density [counts / sq visual deg]');
+    legend({'midget','parasol','bistratified','amacrine','ipRGC'});
+    
+    % Plot cell volumes
+    subplot(2,2,2)
+    plot(supportDeg, sVol(midget.diameter.fitDeg(supportDeg)))
+    hold on
+    plot(supportDeg, sVol(parasol.diameter.fitDeg(supportDeg)))
+    plot(supportDeg, sVol(bistratified.diameter.fitDeg(supportDeg)))
+    plot(supportDeg, sVol(amacrine.diameter.fitDeg(supportDeg)))
+    plot(supportDeg, sVol(ipRGC.diameter.fitDeg(supportDeg)))
+    xlabel('eccentricity [deg visual]');
+    ylabel('individual cell volume [mm^3]');
+    legend({'midget','parasol','bistratified','amacrine','ipRGC'});
+    
+    
+    % Plot thickness
+    subplot(2,2,3)
+    
+    plot(rgcLayer.supportDeg.(meridian), rgcLayer.thickMM.(meridian), 'xk');
+    hold on
+    plot(supportDeg, calcRGCthickness(1,1),'-k');
+    legend({'Curcio RGC measure','Adjusted model','Fixed model'});
+    xlabel('eccentricity [mm retina]');
+    ylabel('layer thickness [mm]]');
+    
+end
 
 end % rgcThickness function
 
-
-%% LOCAL FUNCTIONS
