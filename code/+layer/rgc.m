@@ -1,14 +1,4 @@
-function rgc = rgc( cardinalMeridianAngles, cardinalMeridianNames )
-%
-%
-%
-%{
-    subjectAges = [40 44 51 52 54 57 57 65 66 71 73 76 80 83 84 85 88 92];
-    median(subjectAges)
-
-%}
-
-%% RGC and IPL thickness
+function rgc = rgc()
 % Determined by 18 histologically sectioned maculas. Data from Curcio 2011,
 % Figure 7B and 7C
 %
@@ -17,22 +7,20 @@ function rgc = rgc( cardinalMeridianAngles, cardinalMeridianNames )
 %   ophthalmology & visual science 52.7 (2011): 3943-3954.
 %
 
-% Tissue shrinkage. The Curcio RGC/IPL layer thickness measurements were
-% subjected to a 29% reduction in size due to histological prep. 
-tissueShrinkage = 0.29;
+%% RGC thickness
 
-rgc.supportMM.temporal = [0, 0.09, 0.18, 0.26, 0.35, 0.4, 0.56, 0.69, 0.82, 0.91, 1.11, 1.26, 1.45, 1.7, 1.88, 2.06, 2.27, 2.48, 2.7, 2.94, 2.99];
-rgc.thickMM.temporal = (1/(1-tissueShrinkage)).*[.00455, .00455, .01212, .02273, .03485, .04848, .05303, .05758, .06061, .06061, .05909, .05606, .05303, .05, .04545, .03636, .03485, .0303, .02727, .02121, .02121];
-rgc.supportMM.nasal = [3, 2.88, 2.72, 2.54, 2.35, 2.15, 1.99, 1.86, 1.68, 1.53, 1.33, 1.14, 1.03, 0.87, 0.7, 0.6, 0.48, 0.31, 0.19, 0.11, 0.05, 0];
-rgc.thickMM.nasal = (1/(1-tissueShrinkage)).*[.02121, .02121, .02273, .02576, .0303, .03485, .03788, .04394, .05, .05455, .07212, .06818, .07273, .07273, .07121, .0697, .05909, .05303, .03939, .0197, .00909, .00455];
+rgc.supportMM.temporal = [0	0.05	0.1	0.2	0.4	0.6	0.8	1	1.5	2	2.5	3];
+rgc.thickMM.temporal = [1.741	6.278	11.139	24.376	53.589	58.073	59.321	56.696	49.066	36.2	29.051	19.608]./1000;
+rgc.supportMM.nasal = [3.5	3	2.5	2	1.5	1	0.8	0.6	0.4	0.2	0.1	0.05	0];
+rgc.thickMM.nasal = [13.763	18.447	24.214	36.521	54.329	72.797	71.259	68.945	52.759	18.282	8.541	2.624	1.741]./1000;
 
 % Convert from mm to visual deg
 rgc.supportDeg.temporal = convert_mmRetina_to_degRetina(rgc.supportMM.temporal);
 rgc.supportDeg.nasal = convert_mmRetina_to_degRetina(rgc.supportMM.nasal);
 
-
 % Obtain a spline fit to the thickness measurements
-for mm = [1 3]
+cardinalMeridianNames = {'temporal','nasal'};
+for mm = 1:2
     tmpSupport = rgc.supportDeg.(cardinalMeridianNames{mm})';
     tmpVals = rgc.thickMM.(cardinalMeridianNames{mm})';
     rgc.fitDeg.(cardinalMeridianNames{mm}) = ...

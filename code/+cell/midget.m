@@ -1,4 +1,4 @@
-function midget = midget( cardinalMeridianAngles, cardinalMeridianNames, midgetLinkingFuncParams )
+function midget = midget( cardinalMeridianAngles, cardinalMeridianNames, midgetLinkingFuncParams, totalRGC )
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -7,7 +7,9 @@ function midget = midget( cardinalMeridianAngles, cardinalMeridianNames, midgetL
 
 % Obtain a spline fit to RGC density values from Curcio & Allen
 for mm = 1:length(cardinalMeridianAngles)
-    midget.density.fitDegSq.(cardinalMeridianNames{mm}) = createMidgetDensityFunc(cardinalMeridianAngles(mm),midgetLinkingFuncParams);
+    % Obtain the spline fit function to total RGC density
+    fitRGCDensitySqDegVisual = totalRGC.density.fitDegSq.(cardinalMeridianNames{mm});
+    midget.density.fitDegSq.(cardinalMeridianNames{mm}) = createMidgetDensityFunc(cardinalMeridianAngles(mm),midgetLinkingFuncParams, fitRGCDensitySqDegVisual);
 end
 
 % Midget cell body sizes Liu and colleagues 2017 report midget soma sizes
@@ -34,19 +36,16 @@ end
 
 
 
-function midgetDensityFitDegSq = createMidgetDensityFunc(meridianAngle,midgetLinkingFuncParams)
+function midgetDensityFitDegSq = createMidgetDensityFunc(meridianAngle,midgetLinkingFuncParams, fitRGCDensitySqDegVisual)
 
 
 % Define a support vector in visual degrees
 regularSupportPosDegVisual = 0:0.01:30;
 
-% Obtain the spline fit function to total RGC density
-fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(meridianAngle);
-
 % Define a variable with RGC density over regular support and zero values
 % at the optic disc positions
 RGCDensityOverRegularSupport = ...
-    zeroOpticDiscPoints(fitRGCDensitySqDegVisual(regularSupportPosDegVisual),regularSupportPosDegVisual, meridianAngle);
+    zeroOpticDiscPoints(fitRGCDensitySqDegVisual(regularSupportPosDegVisual)',regularSupportPosDegVisual, meridianAngle);
 
 % Define the mRGC density function
 mRGCDensityOverRegularSupport = transformRGCToMidgetRGCDensityDacey(regularSupportPosDegVisual,RGCDensityOverRegularSupport,...

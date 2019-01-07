@@ -24,7 +24,22 @@
 		"type": "include",
 		"update": "",
 		"url": ""
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "functional_programming",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "webget",
+		"update": "",
+		"url": "https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/39735/versions/4/download/zip"
 	}
+
+
 
 ]
 

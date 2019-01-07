@@ -1,7 +1,4 @@
-function ipl = ipl( cardinalMeridianAngles, cardinalMeridianNames )
-
-
-%% RGC and IPL thickness
+function ipl = ipl()
 % Determined by 18 histologically sectioned maculas. Data from Curcio 2011,
 % Figure 7B and 7C
 %
@@ -10,23 +7,20 @@ function ipl = ipl( cardinalMeridianAngles, cardinalMeridianNames )
 %   ophthalmology & visual science 52.7 (2011): 3943-3954.
 %
 
+%% IPL thickness
 
-% Tissue shrinkage. The Curcio RGC/IPL layer thickness measurements were
-% subjected to a 29% reduction in size due to histological prep
-tissueShrinkage = 0.29;
-
-
-ipl.supportMM.temporal = [0, 0.1, 0.23, 0.38, 0.59, 0.79, 1.04, 1.31, 1.48, 1.76, 1.98, 2.19, 2.45, 2.75, 3];
-ipl.thickMM.temporal = (1/(1-tissueShrinkage)).*[.00303, .00758, .01667, .02273, .02879, .03333, .03636, .03939, .03939, .04091, .04091, .03939, .03788, .03636, .03333];
-ipl.supportMM.nasal = [3, 2.86, 2.69, 2.55, 2.34, 2.13, 1.92, 1.69, 1.56, 1.34, 1.15, 0.84, 0.55, 0.37, 0.13, 0.06, 0];
-ipl.thickMM.nasal = (1/(1-tissueShrinkage)).*[.0303, .03182, .03182, .03182, .03333, .03485, .03636, .03788, .03939, .03939, .03788, .03485, .02879, .02121, .00909, .00455, .00303];
+ipl.supportMM.temporal = [0	0.05	0.1	0.2	0.4	0.6	0.8	1	1.5	2	2.5	3];
+ipl.thickMM.temporal = [0.919	2.841	5.922	14.218	21.359	27.068	31.653	35.258	38.958	39.224	36.958	32.184]./1000;
+ipl.supportMM.nasal = [3.5	3	2.5	2	1.5	1	0.8	0.6	0.4	0.2	0.1	0.05	0];
+ipl.thickMM.nasal = [19.97	29.002	31.349	34.267	38.472	36.911	33.145	28.573	22.142	11.219	5.934	2.702	0.919]./1000;
 
 % Convert mm to deg visual
 ipl.supportDeg.temporal = convert_mmRetina_to_degRetina(ipl.supportMM.temporal);
 ipl.supportDeg.nasal = convert_mmRetina_to_degRetina(ipl.supportMM.nasal);
 
 % Obtain a spline fit to the thickness measurements
-for mm = [1 3]
+cardinalMeridianNames = {'temporal','nasal'};
+for mm = 1:2
     tmpSupport = ipl.supportDeg.(cardinalMeridianNames{mm})';
     tmpVals = ipl.thickMM.(cardinalMeridianNames{mm})';
     ipl.fitDeg.(cardinalMeridianNames{mm}) = ...
