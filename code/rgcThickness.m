@@ -45,21 +45,34 @@ function fVal=rgcThickness(varargin )
 %
 % Examples:
 %{
-    % Search across midget fraction linking params to obtain the best model
-    % fit to tissue thickness
-    myObj = @(p) rgcThickness('midgetLinkingFuncParams',p,'showPlots',false,'forceRecalculate',false);
+    % Simple example
+    rgcThickness('midgetLinkingFuncParams',[4.0011, 2.4361],'packingDensity',0.553,'objectiveType','all')
+%}
+%{
+    % Search across midget fraction linking params
+    myObj = @(p) rgcThickness('midgetLinkingFuncParams',p,'showPlots',false,'forceRecalculate',false,'objectiveType','shape');
+    % Set x0 to be the parameters for the Dacey data
     x0=[12.0290    1.7850];
     ub=[22 3];
     lb=[6 1];
     [x,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
 %}
 %{
-    % Search across packing density to obtain the best model % fit to
-    tissue thickness
-    myObj = @(p) rgcThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false);
+    % Search across packing density
+    myObj = @(p) rgcThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false,'objectiveType','magnitude');
+    % Set x0 to the maximum sphere packing density
     x0=0.74;
     [x,fval]=fmincon(myObj,x0,[],[])
 %}
+%{
+    % Search across both packing density and midget fraction params
+    myObj = @(p) rgcThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',false,'forceRecalculate',false,'objectiveType','all');
+    x0=[6, 2, 0.54];
+    ub=[15 3 0.7];
+    lb=[4 1 0.4];
+    [x,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
+%}
+
 %% input parser
 p = inputParser;
 
@@ -67,15 +80,10 @@ p = inputParser;
 p.addParameter('polarAngle',180,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
-%p.addParameter('midgetLinkingFuncParams',[12.0290    1.7850],@isnumeric); % Dacey params
 p.addParameter('midgetLinkingFuncParams',[6.0007    2.0455],@isnumeric); % Best fit to the OCT data
-%p.addParameter('midgetLinkingFuncParams',[2.2, 1.25],@isnumeric); % Barnett Aguirre values
-%p.addParameter('packingDensity',0.74048048969,@isscalar);
 p.addParameter('packingDensity',0.5428,@isscalar);  % Best fit to the OCT data
-
+p.addParameter('objectiveType','all',@ischar);
 p.addParameter('forceRecalculate',false,@islogical);
-
-
 p.addParameter('showPlots',true,@islogical);
 p.addParameter('octDataFileName', ...
     fullfile(tbLocateProject('rgcPopulationModel','verbose',false),'data','rgcIplThicknessMap.mat'),...
@@ -153,13 +161,18 @@ for mm=1:2
         )) ./ p.Results.packingDensity ./ calc_mmSqRetina_per_degSqVisual(supportDeg,180);
 end
 
-fVal = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDeg') - calcRGCthickness.nasal).^2)) + ...
-    sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDeg') - calcRGCthickness.temporal).^2));
-
-fVal = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDeg')./max(rgcOCTMm.fitDeg.nasal(supportDeg')) - calcRGCthickness.nasal./max(calcRGCthickness.nasal)).^2)) + ...
-    sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDeg')./max(rgcOCTMm.fitDeg.temporal(supportDeg')) - calcRGCthickness.temporal./max(calcRGCthickness.temporal)).^2));
-
-fVal
+% Objective
+switch p.Results.objectiveType
+    case 'all'
+        fVal = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDeg') - calcRGCthickness.nasal).^2)) + ...
+            sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDeg') - calcRGCthickness.temporal).^2));
+    case 'shape'
+        fVal = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDeg')./max(rgcOCTMm.fitDeg.nasal(supportDeg')) - calcRGCthickness.nasal./max(calcRGCthickness.nasal)).^2)) + ...
+            sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDeg')./max(rgcOCTMm.fitDeg.temporal(supportDeg')) - calcRGCthickness.temporal./max(calcRGCthickness.temporal)).^2));
+    case 'magnitude'
+        fVal = sqrt( (max(rgcOCTMm.fitDeg.nasal(supportDeg')) - max(calcRGCthickness.nasal)).^2) + ...
+            sqrt( (max(rgcOCTMm.fitDeg.temporal(supportDeg')) - max(calcRGCthickness.temporal)).^2);
+end
 
 %% Figure prep
 
@@ -205,7 +218,18 @@ if p.Results.showPlots
     ylabel('layer thickness [mm]]');
     ylim([0 0.08]);
     xlim([0 15]);
-    end 
+    end
+    
+    % Plot the midget fraction model
+    regularSupportPosDegVisual = 0:0.1:30;
+    rgcDensitySqDegVisual = totalRGC.density.fitDegSq.temporal(regularSupportPosDegVisual');
+    figure
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDegVisual );
+    plot(regularSupportPosDegVisual,midgetFraction,'-k');
+    hold on
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDegVisual, 'linkingFuncParams', p.Results.midgetLinkingFuncParams );
+    plot(regularSupportPosDegVisual,midgetFraction,'-r');
+    
 end
 
 end % rgcThickness function
