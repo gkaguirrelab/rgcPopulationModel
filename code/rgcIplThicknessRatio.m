@@ -1,4 +1,4 @@
-function [ rgcProportionThickness ] = rgcIplThicknessRatio( regularSupportPosDegVisual, varargin )
+function [ rgcProportionThickness, gammaFit ] = rgcIplThicknessRatio( regularSupportPosDegVisual, varargin )
 % Returns the proportion of RGC+IPL layer thickness on OCT that is RGC
 %
 % Description:
@@ -82,6 +82,13 @@ end
 % Now evaluate the ratio function at the passed support positions
 rgcProportionThickness = ratioFit(regularSupportPosDegVisual);
 
+% Determine the parameters of a Gamma PDF that best fir the ratio function
+myObj = @(p) sqrt(sum((gampdf(localSupport,p(1),p(2))'.*p(3) - ratioFit(localSupport)).^2));
+p=fmincon(myObj,[3,1,2]);
+
+gammaFit = @(supportDeg) gampdf(supportDeg,p(1),p(2))'.*p(3);
+
+    
 end % function
 
 
