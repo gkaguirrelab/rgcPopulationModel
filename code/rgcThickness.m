@@ -46,7 +46,7 @@ function fVal=rgcThickness(varargin )
 % Examples:
 %{
     % Simple example
-    rgcThickness('midgetLinkingFuncParams',[4.0011, 2.4361],'packingDensity',0.553,'objectiveType','all')
+    rgcThickness('midgetLinkingFuncParams',[4.0011, 2.3503],'packingDensity',0.5547,'objectiveType','all')
 %}
 %{
     % Search across midget fraction linking params
@@ -123,8 +123,8 @@ if isempty(rgcOCTMm) || p.Results.forceRecalculate
     rgcOCTMm.supportDeg.nasal = ((1:round(length(rgciplOCTthickness)/2))./round(length(rgciplOCTthickness)/2)).*octRadialDegreesVisualExtent;
     
     % Now obtain the ratio of RGC thickness to RGC+IPL thickness
-    thicknessRatioTemporal = rgcIplThicknessRatio( rgcOCTMm.supportDeg.temporal, 'forceRecalculate', true)';
-    thicknessRatioNasal = rgcIplThicknessRatio( rgcOCTMm.supportDeg.nasal, 'forceRecalculate', true )';
+    thicknessRatioTemporal = rgcIplThicknessRatio( rgcOCTMm.supportDeg.temporal)';
+    thicknessRatioNasal = rgcIplThicknessRatio( rgcOCTMm.supportDeg.nasal)';
     
     % Calculate and store the thickness of the RGC layer in mm
     rgcOCTMm.thickMM.temporal = fliplr(rgciplOCTthickness(1:round(length(rgciplOCTthickness)/2))).*thicknessRatioTemporal./1000;

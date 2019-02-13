@@ -1,4 +1,4 @@
-function [ rgcProportionThickness, gammaFit ] = rgcIplThicknessRatio( regularSupportPosDegVisual, varargin )
+function [ rgcProportionThickness ] = rgcIplThicknessRatio( regularSupportPosDegVisual, varargin )
 % Returns the proportion of RGC+IPL layer thickness on OCT that is RGC
 %
 % Description:
@@ -26,7 +26,7 @@ function [ rgcProportionThickness, gammaFit ] = rgcIplThicknessRatio( regularSup
 %                           eccentricity in visual degrees at which the
 %                           model was evaluated along each meridian
 %
-% Optional key/value pairs:
+% Optional key/value pairs:b
 %  'forceRecalculate'     - When set to true forces the routine to
 %                           re-calculate the thickness ratio function from
 %                           the source data.
@@ -51,18 +51,21 @@ p = inputParser;
 p.addRequired('regularSupportPosDegVisual',@isnumeric);
 
 % optional key/value pairs
-p.addParameter('forceRecalculate',true,@islogical);
+p.addParameter('gammaFitParams',[],@(x)(isempty(x) || isnumeric(x)));
+p.addParameter('referenceEccenDegVisual',10,@isnumeric);
 
 
 % parse
 p.parse(regularSupportPosDegVisual, varargin{:})
 
+% Define a gamma function
+gammaFit = @(supportDeg,p) (gampdf(supportDeg,p(1),p(2))./max(gampdf(supportDeg,p(1),p(2))).*p(3))';
+
 % Define the persistent variable ratioFit. This way, we do not need to
 % re-compute this spline fit result each time we encounter this file
-persistent ratioFit
 
-if isempty(ratioFit) || p.Results.forceRecalculate
-    
+if isempty(p.Results.gammaFitParams)
+        
     % Obtain the Curcio 2011 empirical measurements of RGC and IPL layer
     % thickness from histology
     rgcLayer = layer.rgc();
@@ -72,23 +75,27 @@ if isempty(ratioFit) || p.Results.forceRecalculate
     % then fit this with a cubic spline. This manuever is needed to prevent
     % strange value occurring at very small eccentricities
     localSupport = 0.5:0.1:15;
-    rgcProportionThickness = mean([...
+ 
+        rgcProportionThickness = mean([...
         (rgcLayer.fitDeg.temporal(localSupport)./(rgcLayer.fitDeg.temporal(localSupport)+iplLayer.fitDeg.temporal(localSupport)))'; ...
         (rgcLayer.fitDeg.nasal(localSupport)./(rgcLayer.fitDeg.nasal(localSupport)+iplLayer.fitDeg.nasal(localSupport)))']);
+
+    
+    
     ratioFit = fit([0 localSupport]', [0 rgcProportionThickness]', 'cubicspline');
     
+    
+    % Determine the parameters of a Gamma PDF that best fit the ratio function
+    myObj = @(p) sqrt(sum((gammaFit(localSupport,p) - ratioFit(localSupport)).^2));
+    gammaFitParams=fmincon(myObj,[3,1,2]);
+else
+    gammaFitParams = p.Results.gammaFitParams;
 end
 
 % Now evaluate the ratio function at the passed support positions
-rgcProportionThickness = ratioFit(regularSupportPosDegVisual);
+rgcProportionThickness = gammaFit(regularSupportPosDegVisual,gammaFitParams);
 
-% Determine the parameters of a Gamma PDF that best fir the ratio function
-myObj = @(p) sqrt(sum((gampdf(localSupport,p(1),p(2))'.*p(3) - ratioFit(localSupport)).^2));
-p=fmincon(myObj,[3,1,2]);
 
-gammaFit = @(supportDeg) gampdf(supportDeg,p(1),p(2))'.*p(3);
-
-    
 end % function
 
 
