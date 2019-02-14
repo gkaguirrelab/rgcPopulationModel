@@ -46,7 +46,7 @@ function fVal=rgcThickness(varargin )
 % Examples:
 %{
     % Simple example
-    rgcThickness('midgetLinkingFuncParams',[4.0011, 2.3503],'packingDensity',0.5547,'objectiveType','all')
+    rgcThickness()
 %}
 %{
     % Search across midget fraction linking params
@@ -67,7 +67,7 @@ function fVal=rgcThickness(varargin )
 %{
     % Search across both packing density and midget fraction params
     myObj = @(p) rgcThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',false,'forceRecalculate',false,'objectiveType','all');
-    x0=[6, 2, 0.54];
+    x0=[6, 2, 0.55];
     ub=[15 3 0.7];
     lb=[4 1 0.4];
     [x,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
@@ -80,8 +80,8 @@ p = inputParser;
 p.addParameter('polarAngle',180,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
-p.addParameter('midgetLinkingFuncParams',[6.0007    2.0455],@isnumeric); % Best fit to the OCT data
-p.addParameter('packingDensity',0.5428,@isscalar);  % Best fit to the OCT data
+p.addParameter('midgetLinkingFuncParams',[6.0001    1.9939],@isnumeric); % Best fit to the OCT data
+p.addParameter('packingDensity',0.55,@isscalar);  % Best fit to the OCT data
 p.addParameter('objectiveType','all',@ischar);
 p.addParameter('forceRecalculate',false,@islogical);
 p.addParameter('showPlots',true,@islogical);
@@ -106,7 +106,7 @@ midget = cell.midget(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridia
 parasol = cell.parasol(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames, totalRGC, midget, bistratified);
 
 %% Obtain the TOME OCT thickness measurements
-persistent rgcOCTMm
+persistent rgcOCTMm ratioFuncByThickness
 if isempty(rgcOCTMm) || p.Results.forceRecalculate
     % Load the OCT data
     dataLoad = load(p.Results.octDataFileName);
@@ -117,18 +117,31 @@ if isempty(rgcOCTMm) || p.Results.forceRecalculate
     % Extract the horizontal meridian
     rgciplOCTthickness = rgcIplThicknessMap(round(size(rgcIplThicknessMap,1)/2),:);
     
-    % Construct a data structure to hold the OCT thickness values. Start with
-    % the support in visual degrees
+    % Construct a data structure to hold the OCT thickness values. Start
+    % with the support in visual degrees
     rgcOCTMm.supportDeg.temporal = ((1:round(length(rgciplOCTthickness)/2))./round(length(rgciplOCTthickness)/2)).*octRadialDegreesVisualExtent;
     rgcOCTMm.supportDeg.nasal = ((1:round(length(rgciplOCTthickness)/2))./round(length(rgciplOCTthickness)/2)).*octRadialDegreesVisualExtent;
     
-    % Now obtain the ratio of RGC thickness to RGC+IPL thickness
-    thicknessRatioTemporal = rgcIplThicknessRatio( rgcOCTMm.supportDeg.temporal)';
-    thicknessRatioNasal = rgcIplThicknessRatio( rgcOCTMm.supportDeg.nasal)';
+    % Now obtain the function to express proportion of RGC+IPL thickness
+    % that is RGC
+    ratioFuncByThickness = curcioThicknessRatioModel;
     
-    % Calculate and store the thickness of the RGC layer in mm
-    rgcOCTMm.thickMM.temporal = fliplr(rgciplOCTthickness(1:round(length(rgciplOCTthickness)/2))).*thicknessRatioTemporal./1000;
-    rgcOCTMm.thickMM.nasal = rgciplOCTthickness(round(length(rgciplOCTthickness)/2)+1:end).*thicknessRatioNasal./1000;
+    % Obtain the total thickness of the RGC layer in mm
+    rgciplOCTMm.thickMM.temporal = fliplr(rgciplOCTthickness(1:round(length(rgciplOCTthickness)/2)))./1000;
+    rgciplOCTMm.thickMM.nasal = rgciplOCTthickness(round(length(rgciplOCTthickness)/2)+1:end)./1000;
+    
+    % Remove nans from the data and corresponding support
+    notNanIdx = ~isnan(rgciplOCTMm.thickMM.temporal);
+    rgciplOCTMm.thickMM.temporal = rgciplOCTMm.thickMM.temporal(notNanIdx);
+    rgcOCTMm.supportDeg.temporal = rgcOCTMm.supportDeg.temporal(notNanIdx);
+    
+    notNanIdx = ~isnan(rgciplOCTMm.thickMM.nasal);
+    rgciplOCTMm.thickMM.nasal = rgciplOCTMm.thickMM.nasal(notNanIdx);
+    rgcOCTMm.supportDeg.nasal = rgcOCTMm.supportDeg.nasal(notNanIdx);
+    
+    % Obtain the rgc component
+    rgcOCTMm.thickMM.temporal = rgciplOCTMm.thickMM.temporal .* ratioFuncByThickness(rgcOCTMm.supportDeg.temporal,rgciplOCTMm.thickMM.temporal);
+    rgcOCTMm.thickMM.nasal = rgciplOCTMm.thickMM.nasal .* ratioFuncByThickness(rgcOCTMm.supportDeg.nasal,rgciplOCTMm.thickMM.nasal);
     
     % Obtain a spline fit to the thickness measurements
     for mm = [1 3]
