@@ -69,7 +69,7 @@ rgcLayer = layer.rgc();
 iplLayer = layer.ipl();
 
 % Regular support for position om the retina
-regularSupportVisDeg = 0.5:0.1:15;
+regularSupportVisDeg = 0.5:0.01:15;
 
 % Regular support for thickness cumulative sum
 regularSupportCumSum = 0.0005:0.0005:2;
@@ -94,16 +94,17 @@ for mm = 1:length(meridians)
     thicknessCumSum = ...
         relativeCumulativeThickness(regularSupportVisDeg, thickRGCIPL, p.Results.referenceEccenDegVisual);
     
-
-    
     % Obtain the ratio [ RGC / (RGC+IPL) ] across regular support
     rgcThickRatio = rgcLayer.fitDeg.(meridians{mm})(regularSupportVisDeg)' ./ thickRGCIPL;
-
-            % Plot
+    
+    % Plot
     if p.Results.showPlots
-        subplot(1,3,1)
+        subplot(1,4,1)
         plot(regularSupportVisDeg,rgcThickRatio)
-      hold on
+        hold on
+        subplot(1,4,2)
+        plot(regularSupportVisDeg,thicknessCumSum)
+        hold on
     end
     
     % Obtain a spline fit to the relationship between relative
@@ -117,7 +118,7 @@ for mm = 1:length(meridians)
     
     % Plot
     if p.Results.showPlots
-        subplot(1,3,2)
+        subplot(1,4,3)
         plot(thicknessCumSum,rgcThickRatio)
         hold on
     end
@@ -141,14 +142,14 @@ if p.Results.showPlots
     legend([meridians;'average']);
     xlabel('Relative cumulative thickness of RGC and IPL layers');
     ylabel('Proportion of RGC+IPL layer that is RGC');
-
-    subplot(1,3,3)
+    
+    subplot(1,4,4)
     hold on
-    expandedRegularSupportVisDeg = 0:0.1:20;    
+    expandedRegularSupportVisDeg = 0:0.1:20;
     for mm=1:length(meridians)
-        thickRGCIPL = (rgcLayer.fitDeg.(meridians{end})(expandedRegularSupportVisDeg) + ...
-        iplLayer.fitDeg.(meridians{mm})(expandedRegularSupportVisDeg))';    
-    plot(expandedRegularSupportVisDeg,ratioFuncByThickness(expandedRegularSupportVisDeg,thickRGCIPL))
+        thickRGCIPL = (rgcLayer.fitDeg.(meridians{mm})(expandedRegularSupportVisDeg) + ...
+            iplLayer.fitDeg.(meridians{mm})(expandedRegularSupportVisDeg))';
+        plot(expandedRegularSupportVisDeg,ratioFuncByThickness(expandedRegularSupportVisDeg,thickRGCIPL))
     end
     xlabel('Eccentricity visual degrees');
     ylabel('Proportion of RGC+IPL layer that is RGC');
@@ -161,15 +162,11 @@ end % function
 
 %% LOCAL
 
-function output = removeNan(input)
-    output = inp
-end
-
 function thicknessCumSum = relativeCumulativeThickness(regularSupportVisDeg, thickness, referenceEccenDegVisual)
 
 % Obtain the cumulative sum of the thickness across regular support
 thicknessCumSum = calcRingCumulative(regularSupportVisDeg,thickness);
-    
+
 % Express the cumulative total thickness relative to the reference
 % eccentricity
 [ ~, refPointIdx ] = min(abs(regularSupportVisDeg-referenceEccenDegVisual));
