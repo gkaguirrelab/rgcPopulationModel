@@ -55,14 +55,15 @@ function fVal=rgcThickness(varargin )
     x0=[12.0290    1.7850];
     ub=[22 3];
     lb=[6 1];
-    [x,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
+    [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
+    rgcThickness('midgetLinkingFuncParams',p,'showPlots',true,'forceRecalculate',false,'objectiveType','shape');
 %}
 %{
     % Search across packing density
     myObj = @(p) rgcThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false,'objectiveType','magnitude');
     % Set x0 to the maximum sphere packing density
     x0=0.74;
-    [x,fval]=fmincon(myObj,x0,[],[])
+    [p,fval]=fmincon(myObj,x0,[],[])
 %}
 %{
     % Search across both packing density and midget fraction params
@@ -70,7 +71,8 @@ function fVal=rgcThickness(varargin )
     x0=[6, 2, 0.55];
     ub=[15 3 0.7];
     lb=[4 1 0.4];
-    [x,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
+    [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
+    rgcThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',true,'forceRecalculate',false,'objectiveType','all');
 %}
 
 %% input parser
@@ -80,8 +82,8 @@ p = inputParser;
 p.addParameter('polarAngle',180,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
-p.addParameter('midgetLinkingFuncParams',[6.0001    1.9939],@isnumeric); % Best fit to the OCT data
-p.addParameter('packingDensity',0.55,@isscalar);  % Best fit to the OCT data
+p.addParameter('midgetLinkingFuncParams',[4.0016    2.4357],@isnumeric); % Best fit to the OCT data
+p.addParameter('packingDensity',0.5556,@isscalar);  % Best fit to the OCT data
 p.addParameter('objectiveType','all',@ischar);
 p.addParameter('forceRecalculate',false,@islogical);
 p.addParameter('showPlots',true,@islogical);
@@ -241,7 +243,8 @@ if p.Results.showPlots
     plot(regularSupportPosDegVisual,midgetFraction,'-k');
     hold on
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDegVisual, 'linkingFuncParams', p.Results.midgetLinkingFuncParams );
-    plot(regularSupportPosDegVisual,midgetFraction,'-r');
+    halfRange = round(length(regularSupportPosDegVisual)/2);
+    plot(regularSupportPosDegVisual(1:halfRange),midgetFraction(1:halfRange),'-r');
     
 end
 
