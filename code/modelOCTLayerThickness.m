@@ -1,4 +1,4 @@
-function fVal=rgcThickness(varargin )
+function fVal=modelOCTLayerThickness(varargin )
 % Caclulates RGC layer thickness by reference to constituent cell classes
 %
 % Description:
@@ -46,33 +46,33 @@ function fVal=rgcThickness(varargin )
 % Examples:
 %{
     % Simple example
-    rgcThickness()
+    modelOCTLayerThickness()
 %}
 %{
     % Search across midget fraction linking params
-    myObj = @(p) rgcThickness('midgetLinkingFuncParams',p,'showPlots',false,'forceRecalculate',false,'objectiveType','shape');
+    myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p,'showPlots',false,'forceRecalculate',false,'objectiveType','shape');
     % Set x0 to be the parameters for the Dacey data
     x0=[12.0290    1.7850];
     ub=[22 3];
     lb=[6 1];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
-    rgcThickness('midgetLinkingFuncParams',p,'showPlots',true,'forceRecalculate',false,'objectiveType','shape');
+    modelOCTLayerThickness('midgetLinkingFuncParams',p,'showPlots',true,'forceRecalculate',false,'objectiveType','shape');
 %}
 %{
     % Search across packing density
-    myObj = @(p) rgcThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false,'objectiveType','magnitude');
+    myObj = @(p) modelOCTLayerThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false,'objectiveType','magnitude');
     % Set x0 to the maximum sphere packing density
     x0=0.74;
     [p,fval]=fmincon(myObj,x0,[],[])
 %}
 %{
     % Search across both packing density and midget fraction params
-    myObj = @(p) rgcThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',false,'forceRecalculate',false,'objectiveType','all');
+    myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',false,'forceRecalculate',false,'objectiveType','all');
     x0=[6, 2, 0.55];
     ub=[15 3 0.7];
     lb=[4 1 0.4];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
-    rgcThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',true,'forceRecalculate',false,'objectiveType','all');
+    modelOCTLayerThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',true,'forceRecalculate',false,'objectiveType','all');
 %}
 
 %% input parser
