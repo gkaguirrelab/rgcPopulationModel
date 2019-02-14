@@ -46,7 +46,7 @@ function fVal=modelOCTLayerThickness(varargin )
 % Examples:
 %{
     % Simple example
-    modelOCTLayerThickness()
+    modelOCTLayerThickness('makeCellMaps',false)
 %}
 %{
     % Search across midget fraction linking params
@@ -113,10 +113,8 @@ parasol = cell.parasol(p.Results.cardinalMeridianAngles, p.Results.cardinalMerid
 persistent rgcOCTMm ratioFuncByThickness
 if isempty(rgcOCTMm) || p.Results.forceRecalculate
     % Load the OCT data
-    dataLoad = load(p.Results.octDataFileName);
-    rgcIplThicknessMap = dataLoad.rgcIplThicknessMap;
+    load(p.Results.octDataFileName,'rgcIplThicknessMap');
     octRadialDegreesVisualExtent = 15;
-    clear dataLoad
     
     % Extract the horizontal meridian
     rgciplOCTthickness = rgcIplThicknessMap(round(size(rgcIplThicknessMap,1)/2),:);
@@ -126,7 +124,7 @@ if isempty(rgcOCTMm) || p.Results.forceRecalculate
     rgcOCTMm.supportDeg.temporal = ((1:round(length(rgciplOCTthickness)/2))./round(length(rgciplOCTthickness)/2)).*octRadialDegreesVisualExtent;
     rgcOCTMm.supportDeg.nasal = ((1:round(length(rgciplOCTthickness)/2))./round(length(rgciplOCTthickness)/2)).*octRadialDegreesVisualExtent;
     
-    % Now obtain the function to express proportion of RGC+IPL thickness
+    % Obtain the function to express proportion of RGC+IPL thickness
     % that is RGC
     ratioFuncByThickness = curcioThicknessRatioModel;
     
@@ -193,6 +191,20 @@ fVal = max([nasalError temporalError]).^2;
 
 % Make maps of cell density
 if p.Results.makeCellMaps
+    load(p.Results.octDataFileName,'rgcIplThicknessMap');
+
+    % Create the support for the image in degrees visual angle
+    octRadialDegreesVisualExtent = 15;
+    dim = size(rgcIplThicknessMap,1);
+    octSupportDegVis = ((1:round(dim/2))./round(dim/2)).*octRadialDegreesVisualExtent;
+    
+    % Conver the RGC+IPL thickness map to polar coordinates
+    rgcIplThicknessPolar = convertImageMapToPolarMap(rgcIplThicknessMap);
+    
+    % Obtain the function to express proportion of RGC+IPL thickness
+    % that is RGC
+    ratioFuncByThickness = curcioThicknessRatioModel;
+    
     
 end
 
