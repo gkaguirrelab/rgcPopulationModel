@@ -50,7 +50,7 @@ function fVal=modelOCTLayerThickness(varargin )
 %}
 %{
     % Search across midget fraction linking params
-    myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p,'showPlots',false,'forceRecalculate',false,'objectiveType','shape');
+    myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p,'showPlots',false,'forceRecalculate',false,'objectiveType','shape','supportDeg',(1:1:10)');
     % Set x0 to be the parameters for the Dacey data
     x0=[12.0290    1.7850];
     ub=[22 3];
@@ -60,17 +60,17 @@ function fVal=modelOCTLayerThickness(varargin )
 %}
 %{
     % Search across packing density
-    myObj = @(p) modelOCTLayerThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false,'objectiveType','magnitude');
+    myObj = @(p) modelOCTLayerThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false,'objectiveType','magnitude','supportDeg',(1:1:10)');
     % Set x0 to the maximum sphere packing density
     x0=0.74;
     [p,fval]=fmincon(myObj,x0,[],[])
 %}
 %{
     % Search across both packing density and midget fraction params
-    myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',false,'forceRecalculate',false,'objectiveType','all');
-    x0=[6, 2, 0.55];
-    ub=[15 3 0.7];
-    lb=[4 1 0.4];
+    myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',false,'forceRecalculate',false,'objectiveType','all','supportDeg',(1:1:10)');
+    x0=[4.0016  2.4357  0.5556];
+    ub=[15 10 0.7];
+    lb=[1 1 0.4];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
     modelOCTLayerThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',true,'forceRecalculate',false,'objectiveType','all');
 %}
@@ -82,11 +82,13 @@ p = inputParser;
 p.addParameter('polarAngle',180,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
-p.addParameter('midgetLinkingFuncParams',[4.0016    2.4357],@isnumeric); % Best fit to the OCT data
-p.addParameter('packingDensity',0.5556,@isscalar);  % Best fit to the OCT data
+p.addParameter('midgetLinkingFuncParams',[4.0068    2.4474],@isnumeric); % Best fit to the OCT data
+p.addParameter('supportDeg',(0:1:10)',@isnumeric);
+p.addParameter('packingDensity',0.5552,@isscalar);  % Best fit to the OCT data
 p.addParameter('objectiveType','all',@ischar);
 p.addParameter('forceRecalculate',false,@islogical);
 p.addParameter('showPlots',true,@islogical);
+p.addParameter('makeCellMaps',false,@islogical);
 p.addParameter('octDataFileName', ...
     fullfile(tbLocateProject('rgcPopulationModel','verbose',false),'data','rgcIplThicknessMap.mat'),...
     @ischar);
@@ -162,9 +164,8 @@ sVol = @(d) 4/3*pi*(d./2).^3;
 % Pick the meridian to model
 cardinalMeridianNames = {'nasal','temporal'};
 
-% Set the support to be the locations of the Curcio 2011 RGC thickness
-% measurements
-supportDeg = (0:1:10)';
+% Set the support. A range of 0-10 degrees matches the Curcio data.
+supportDeg = p.Results.supportDeg;
 
 for mm=1:2
     calcRGCthickness.(cardinalMeridianNames{mm}) = ((...
@@ -176,63 +177,69 @@ for mm=1:2
         )) ./ p.Results.packingDensity ./ calc_mmSqRetina_per_degSqVisual(supportDeg,180);
 end
 
-% Objective
+% Objective for the nasal and temporal meridians
 switch p.Results.objectiveType
     case 'all'
-        fVal = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDeg') - calcRGCthickness.nasal).^2)) + ...
-            sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDeg') - calcRGCthickness.temporal).^2));
+        nasalError = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDeg') - calcRGCthickness.nasal).^2));
+        temporalError = sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDeg') - calcRGCthickness.temporal).^2));
     case 'shape'
-        fVal = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDeg')./max(rgcOCTMm.fitDeg.nasal(supportDeg')) - calcRGCthickness.nasal./max(calcRGCthickness.nasal)).^2)) + ...
-            sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDeg')./max(rgcOCTMm.fitDeg.temporal(supportDeg')) - calcRGCthickness.temporal./max(calcRGCthickness.temporal)).^2));
+        nasalError = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDeg')./max(rgcOCTMm.fitDeg.nasal(supportDeg')) - calcRGCthickness.nasal./max(calcRGCthickness.nasal)).^2));
+        temporalError = sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDeg')./max(rgcOCTMm.fitDeg.temporal(supportDeg')) - calcRGCthickness.temporal./max(calcRGCthickness.temporal)).^2));
     case 'magnitude'
-        fVal = sqrt( (max(rgcOCTMm.fitDeg.nasal(supportDeg')) - max(calcRGCthickness.nasal)).^2) + ...
-            sqrt( (max(rgcOCTMm.fitDeg.temporal(supportDeg')) - max(calcRGCthickness.temporal)).^2);
+        nasalError =  sqrt( (max(rgcOCTMm.fitDeg.nasal(supportDeg')) - max(calcRGCthickness.nasal)).^2);
+        temporalError = sqrt( (max(rgcOCTMm.fitDeg.temporal(supportDeg')) - max(calcRGCthickness.temporal)).^2);
+end
+fVal = max([nasalError temporalError]).^2;
+
+% Make maps of cell density
+if p.Results.makeCellMaps
+    
 end
 
-%% Figure prep
 
+%% Figure prep
 if p.Results.showPlots
     for mm = 1:2
-    figure
-    meridian = cardinalMeridianNames{mm};
-    
-    % Plot counts
-    subplot(2,2,1)
-    plot(supportDeg, midget.density.fitDegSq.(meridian)(supportDeg))
-    hold on
-    plot(supportDeg, parasol.density.fitDegSq.(meridian)(supportDeg))
-    plot(supportDeg, bistratified.density.fitDegSq.(meridian)(supportDeg))
-    plot(supportDeg, amacrine.density.fitDegSq.(meridian)(supportDeg))
-    plot(supportDeg, ipRGC.density.fitDegSq.(meridian)(supportDeg))
-    %plot(supportDeg, midget.density.fitDegSq.(meridian)(supportDeg) + parasol.density.fitDegSq.(meridian)(supportDeg) + bistratified.density.fitDegSq.(meridian)(supportDeg) +ipRGC.density.fitDegSq.(meridian)(supportDeg) + amacrine.density.fitDegSq.(meridian)(supportDeg),'xr')
-    xlabel('eccentricity [deg visual]');
-    ylabel('density [counts / sq visual deg]');
-    legend({'midget','parasol','bistratified','amacrine','ipRGC'});
-    
-    % Plot cell volumes
-    subplot(2,2,2)
-    plot(supportDeg, sVol(midget.diameter.fitDeg(supportDeg)))
-    hold on
-    plot(supportDeg, sVol(parasol.diameter.fitDeg(supportDeg)))
-    plot(supportDeg, sVol(bistratified.diameter.fitDeg(supportDeg)))
-    plot(supportDeg, sVol(amacrine.diameter.fitDeg(supportDeg)))
-    plot(supportDeg, sVol(ipRGC.diameter.fitDeg(supportDeg)))
-    xlabel('eccentricity [deg visual]');
-    ylabel('individual cell volume [mm^3]');
-    legend({'midget','parasol','bistratified','amacrine','ipRGC'});
-    
-    
-    % Plot thickness
-    subplot(2,2,3)
-    
-    plot(rgcOCTMm.supportDeg.(meridian), rgcOCTMm.thickMM.(meridian), 'xk');
-    hold on
-    plot(supportDeg, calcRGCthickness.(meridian),'-k');
-    legend({'RGC layer thickness OCT','Cell population model'});
-    xlabel('eccentricity [deg visual]');
-    ylabel('layer thickness [mm]]');
-    ylim([0 0.08]);
-    xlim([0 15]);
+        figure
+        meridian = cardinalMeridianNames{mm};
+        
+        % Plot counts
+        subplot(2,2,1)
+        plot(supportDeg, midget.density.fitDegSq.(meridian)(supportDeg))
+        hold on
+        plot(supportDeg, parasol.density.fitDegSq.(meridian)(supportDeg))
+        plot(supportDeg, bistratified.density.fitDegSq.(meridian)(supportDeg))
+        plot(supportDeg, amacrine.density.fitDegSq.(meridian)(supportDeg))
+        plot(supportDeg, ipRGC.density.fitDegSq.(meridian)(supportDeg))
+        %plot(supportDeg, midget.density.fitDegSq.(meridian)(supportDeg) + parasol.density.fitDegSq.(meridian)(supportDeg) + bistratified.density.fitDegSq.(meridian)(supportDeg) +ipRGC.density.fitDegSq.(meridian)(supportDeg) + amacrine.density.fitDegSq.(meridian)(supportDeg),'xr')
+        xlabel('eccentricity [deg visual]');
+        ylabel('density [counts / sq visual deg]');
+        legend({'midget','parasol','bistratified','amacrine','ipRGC'});
+        
+        % Plot cell volumes
+        subplot(2,2,2)
+        plot(supportDeg, sVol(midget.diameter.fitDeg(supportDeg)))
+        hold on
+        plot(supportDeg, sVol(parasol.diameter.fitDeg(supportDeg)))
+        plot(supportDeg, sVol(bistratified.diameter.fitDeg(supportDeg)))
+        plot(supportDeg, sVol(amacrine.diameter.fitDeg(supportDeg)))
+        plot(supportDeg, sVol(ipRGC.diameter.fitDeg(supportDeg)))
+        xlabel('eccentricity [deg visual]');
+        ylabel('individual cell volume [mm^3]');
+        legend({'midget','parasol','bistratified','amacrine','ipRGC'});
+        
+        
+        % Plot thickness
+        subplot(2,2,3)
+        
+        plot(rgcOCTMm.supportDeg.(meridian), rgcOCTMm.thickMM.(meridian), 'xk');
+        hold on
+        plot(supportDeg, calcRGCthickness.(meridian),'-k');
+        legend({'RGC layer thickness OCT','Cell population model'});
+        xlabel('eccentricity [deg visual]');
+        ylabel('layer thickness [mm]]');
+        ylim([0 0.08]);
+        xlim([0 15]);
     end
     
     % Plot the midget fraction model
