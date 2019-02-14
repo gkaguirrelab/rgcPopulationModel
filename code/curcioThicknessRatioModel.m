@@ -83,8 +83,6 @@ ratioRelationship = zeros(size(regularSupportCumSum));
 % Plot
 if p.Results.showPlots
     figure
-    subplot(1,2,1)
-    hold on
 end
 
 for mm = 1:length(meridians)
@@ -96,8 +94,17 @@ for mm = 1:length(meridians)
     thicknessCumSum = ...
         relativeCumulativeThickness(regularSupportVisDeg, thickRGCIPL, p.Results.referenceEccenDegVisual);
     
+
+    
     % Obtain the ratio [ RGC / (RGC+IPL) ] across regular support
     rgcThickRatio = rgcLayer.fitDeg.(meridians{mm})(regularSupportVisDeg)' ./ thickRGCIPL;
+
+            % Plot
+    if p.Results.showPlots
+        subplot(1,3,1)
+        plot(regularSupportVisDeg,rgcThickRatio)
+      hold on
+    end
     
     % Obtain a spline fit to the relationship between relative
     % cumulative thickness and the thickness ratio
@@ -110,7 +117,9 @@ for mm = 1:length(meridians)
     
     % Plot
     if p.Results.showPlots
+        subplot(1,3,2)
         plot(thicknessCumSum,rgcThickRatio)
+        hold on
     end
 end
 
@@ -133,7 +142,7 @@ if p.Results.showPlots
     xlabel('Relative cumulative thickness of RGC and IPL layers');
     ylabel('Proportion of RGC+IPL layer that is RGC');
 
-    subplot(1,2,2)
+    subplot(1,3,3)
     hold on
     expandedRegularSupportVisDeg = 0:0.1:20;    
     for mm=1:length(meridians)
