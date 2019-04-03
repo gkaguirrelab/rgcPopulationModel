@@ -1,35 +1,78 @@
+function cellProportionModel
+
+cardinalMeridianAngles = [0 90 180 270];
 cardinalMeridianNames =  {'nasal' 'superior' 'temporal' 'inferior'};
+lineColor = {'r','g','b','c'};
 
-totalRGC = cell.totalRGC([0 90 180 270],cardinalMeridianNames);
-    
-% a - Hill's slope; the steepness of the curve
-% b - inflection point; the point at which the curvature changes sign
-% c - maximum asymptote
-% d - asymmetry factor (symmetric around inflection when d = 1)
-fourParamLogitFunc = @(a,b,c,d,x) c./((1+(x./b).^a).^d);
+% The total number of retinal ganglion cells in the retina is ~1 million.
+totalRetinalRGCs = 1e6;
 
-x=0:0.01:15;
-[ ~, refPointIdx ] = min(abs(x-10));
+% Regular support for cumulative sum
+regularSupportCumSum = 0:0.01:1.2;
+
+% Create a function handle that provides spline interpolated values
+splineInterp = @(x,y,xq) ppval(spline(x,y),xq);
+
+% Obtain the average cumulative RGC density across meridians across
+% regualar support
+regularSupportDeg=0:0.01:90;
+loopVar = zeros(size(regularSupportDeg));
+for mm = 1:length(cardinalMeridianNames)
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(cardinalMeridianAngles(mm));
+    loopVar = loopVar+fitRGCDensitySqDegVisual(regularSupportDeg);
+end
+meanRGCDensity = loopVar./length(cardinalMeridianNames);
+meanRGCCumSum = calcRingCumulative(regularSupportDeg,meanRGCDensity);
+maxMeanRGCCumSum = max(meanRGCCumSum);
+meanRGCCumSum = meanRGCCumSum./maxMeanRGCCumSum;
+
+% Generate a function that expresses amacrine cell count across regular
+% support and with a given profile of RGC density. The amacrine values were
+% reported for the average across merdians, and thus will be related to the
+% average RGCCumSum
+amacrine = cell.amacrine( 0, {'nasal'} );
+amacrineCumSum = calcRingCumulative(regularSupportDeg,amacrine.density.fitDegSq.nasal(regularSupportDeg)');
+amacrineCumSum = amacrineCumSum./maxMeanRGCCumSum;
 
 figure
+plot(regularSupportDeg,meanRGCDensity,'-k');
+hold on
+plot(regularSupportDeg,amacrine.density.fitDegSq.nasal(regularSupportDeg)','-r');
+
+
+% Remove the initial run of points for which the meanRGCCumSum is all zero
+initialZeroIdx = find(meanRGCCumSum==0);
+meanRGCCumSum=meanRGCCumSum(initialZeroIdx(end):end);
+amacrineCumSum=amacrineCumSum(initialZeroIdx(end):end);
+refucedSupportDeg = regularSupportDeg(initialZeroIdx(end):end);
+
+
+figure
+plot(refucedSupportDeg,meanRGCCumSum,'-k')    
+hold on
+plot(refucedSupportDeg,amacrineCumSum,'-r')    
+hold off
+
+figure
+plot(meanRGCCumSum,amacrineCumSum)
+plot(amacrineCumSum./meanRGCCumSum)
 hold on
 
-lineColor = {'r','g','b','k'};
 
-for mm = 1:length(cardinalMeridianNames)
-
-thicknessCumSum = calcRingCumulative(x,totalRGC.density.fitDegSq.(cardinalMeridianNames{mm})(x)');
-
-%thicknessCumSum = thicknessCumSum ./ thicknessCumSum(refPointIdx);
-thicknessCumSum = thicknessCumSum ./ 6e5;
-
-plot(x,thicknessCumSum,'-','Color',lineColor{mm})
-
-% Fit a logistic function
-myObj = @(p) sum((thicknessCumSum - fourParamLogitFunc(p(1),p(2),p(3),p(4),x)).^2);
-[fitVal, fVal] = fmincon(myObj,[-2,4,1,3],[],[]);
-
-plot(x,fourParamLogitFunc(fitVal(1),fitVal(2),fitVal(3),fitVal(4),x),'.','Color',lineColor{mm})
+% And now a function to return that provides the thickness of the RGC
+% portion of the RGC+IPL layer given that total thickness over regular
+% support.
+amacrineDensityFunc = @(regularSupportDeg, rgcDensity) splineInterp(regularSupportCumSum,splineInterp(meanRGCCumSum,amacrineDensity',regularSupportCumSum),relativeCumulativeCount(regularSupportDeg, rgcDensity, totalRetinalRGCs));
+for mm = 2:length(cardinalMeridianNames)
+    fitRGCDensitySqDegVisual = getSplineFitToRGCDensitySqDegVisual(cardinalMeridianAngles(mm));
+    plot(regularSupportDeg,amacrineDensityFunc(regularSupportDeg, fitRGCDensitySqDegVisual(regularSupportDeg)),'-','Color',lineColor{mm})
 end
 
+
+%     plot(x,cellCountCumSum,'-','Color',lineColor{mm})
+%     [fitParams,fVal] = fourParamLogitFit(x,cellCountCumSum);
+%     fitParams
+%     plot(x2,fourParamLogitFunc(fitParams(1),fitParams(2),fitParams(3),fitParams(4),x2),'.','Color',lineColor{mm})    
+
+end
 
