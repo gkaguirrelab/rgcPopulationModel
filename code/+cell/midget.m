@@ -36,7 +36,7 @@ end
 
 
 
-function midgetDensityFitDegSq = createMidgetDensityFunc(meridianAngle,midgetLinkingFuncParams, fitRGCDensitySqDegVisual)
+function midgetDensityFitDegSq = createMidgetDensityFunc(meridianAngle, midgetLinkingFuncParams, fitRGCDensitySqDegVisual)
 
 
 % Define a support vector in visual degrees
@@ -48,8 +48,19 @@ RGCDensityOverRegularSupport = ...
     zeroOpticDiscPoints(fitRGCDensitySqDegVisual(regularSupportPosDegVisual)',regularSupportPosDegVisual, meridianAngle);
 
 % Define the mRGC density function
-mRGCDensityOverRegularSupport = transformRGCToMidgetRGCDensityDacey(regularSupportPosDegVisual,RGCDensityOverRegularSupport,...
-    'linkingFuncParams',midgetLinkingFuncParams);
+switch length(midgetLinkingFuncParams)
+    case 2
+        mRGCDensityOverRegularSupport = transformRGCToMidgetRGCDensityDacey(regularSupportPosDegVisual,RGCDensityOverRegularSupport,...
+            'linkingFuncParams',midgetLinkingFuncParams);
+    case 3
+        mRGCDensityOverRegularSupport = transformRGCToMidgetRGCDensityDacey(regularSupportPosDegVisual,RGCDensityOverRegularSupport,...
+            'linkingFuncParams',midgetLinkingFuncParams(1:2),'minMidgetFractionRatio',midgetLinkingFuncParams(3));
+    case 4
+        mRGCDensityOverRegularSupport = transformRGCToMidgetRGCDensityDacey(regularSupportPosDegVisual,RGCDensityOverRegularSupport,...
+            'linkingFuncParams',midgetLinkingFuncParams(1:2),'minMidgetFractionRatio',midgetLinkingFuncParams(3),'maxMidgetFractionRatio',midgetLinkingFuncParams(4));
+end
+
+%mRGCDensityOverRegularSupport = transformRGCToMidgetRGCDensityDrasdo(regularSupportPosDegVisual,RGCDensityOverRegularSupport);
 
 % Perform a spline fit to the mRGC density expressed in mm and mm sq units
 midgetDensityFitDegSq = fit(regularSupportPosDegVisual', mRGCDensityOverRegularSupport', 'smoothingspline');

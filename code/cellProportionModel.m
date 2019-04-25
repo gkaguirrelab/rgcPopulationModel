@@ -13,8 +13,8 @@ regularSupportCumSum = 0:0.01:1.2;
 % Create a function handle that provides spline interpolated values
 splineInterp = @(x,y,xq) ppval(spline(x,y),xq);
 
-% Obtain the average cumulative RGC density across meridians across
-% regualar support
+% Obtain the average cumulative RGC density across meridians across regular
+% support
 regularSupportDeg=0:0.01:90;
 loopVar = zeros(size(regularSupportDeg));
 for mm = 1:length(cardinalMeridianNames)
@@ -44,18 +44,17 @@ plot(regularSupportDeg,amacrine.density.fitDegSq.nasal(regularSupportDeg)','-r')
 initialZeroIdx = find(meanRGCCumSum==0);
 meanRGCCumSum=meanRGCCumSum(initialZeroIdx(end):end);
 amacrineCumSum=amacrineCumSum(initialZeroIdx(end):end);
-refucedSupportDeg = regularSupportDeg(initialZeroIdx(end):end);
+reducedSupportDeg = regularSupportDeg(initialZeroIdx(end):end);
 
 
 figure
-plot(refucedSupportDeg,meanRGCCumSum,'-k')    
+plot(reducedSupportDeg,meanRGCCumSum,'-k')    
 hold on
-plot(refucedSupportDeg,amacrineCumSum,'-r')    
+plot(reducedSupportDeg,amacrineCumSum,'-r')    
 hold off
 
 figure
 plot(meanRGCCumSum,amacrineCumSum)
-plot(amacrineCumSum./meanRGCCumSum)
 hold on
 
 

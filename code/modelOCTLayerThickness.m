@@ -52,9 +52,9 @@ function fVal=modelOCTLayerThickness(varargin )
     % Search across midget fraction linking params
     myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p,'showPlots',false,'forceRecalculate',false,'objectiveType','shape','supportDeg',(1:1:10)');
     % Set x0 to be the parameters for the Dacey data
-    x0=[12.0290    1.7850];
-    ub=[22 3];
-    lb=[6 1];
+    x0=[12.0290 0.4320];
+    ub=[14 0.6];
+    lb=[10 0.2];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
     modelOCTLayerThickness('midgetLinkingFuncParams',p,'showPlots',true,'forceRecalculate',false,'objectiveType','shape');
 %}
@@ -63,16 +63,16 @@ function fVal=modelOCTLayerThickness(varargin )
     myObj = @(p) modelOCTLayerThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false,'objectiveType','magnitude','supportDeg',(1:1:10)');
     % Set x0 to the maximum sphere packing density
     x0=0.74;
-    [p,fval]=fmincon(myObj,x0,[],[])
+    [p,fval]=fminsearch(myObj,x0)
 %}
 %{
     % Search across both packing density and midget fraction params
-    myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',false,'forceRecalculate',false,'objectiveType','all','supportDeg',(1:1:10)');
-    x0=[4.0016  2.4357  0.5556];
-    ub=[15 10 0.7];
-    lb=[1 1 0.4];
+    myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false,'objectiveType','all','supportDeg',(1:1:10)');
+    x0=[12.0290 0.4320  0.41  0.95  0.5556];
+    ub=[15 0.7 0.6 1.0 0.7];
+    lb=[1 0.1 0.2 0.9 0.4];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
-    modelOCTLayerThickness('midgetLinkingFuncParams',p(1:2),'packingDensity',p(3),'showPlots',true,'forceRecalculate',false,'objectiveType','all');
+    modelOCTLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false,'objectiveType','all');
 %}
 
 %% input parser
@@ -82,11 +82,11 @@ p = inputParser;
 p.addParameter('polarAngle',180,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
-p.addParameter('midgetLinkingFuncParams',[4.0068    2.4474],@isnumeric); % Best fit to the OCT data
+p.addParameter('midgetLinkingFuncParams',[7.1901    0.4269    0.4072    0.9443],@isnumeric); % Best fit to the OCT data
 p.addParameter('supportDeg',(0:1:10)',@isnumeric);
-p.addParameter('packingDensity',0.5552,@isscalar);  % Best fit to the OCT data
+p.addParameter('packingDensity',0.5858,@isscalar);  % Best fit to the OCT data
 p.addParameter('objectiveType','all',@ischar);
-p.addParameter('forceRecalculate',false,@islogical);
+p.addParameter('forceRecalculate',true,@islogical);
 p.addParameter('showPlots',true,@islogical);
 p.addParameter('makeCellMaps',false,@islogical);
 p.addParameter('octDataFileName', ...
@@ -126,7 +126,7 @@ if isempty(rgcOCTMm) || p.Results.forceRecalculate
     
     % Obtain the function to express proportion of RGC+IPL thickness
     % that is RGC
-    ratioFuncByThickness = curcioThicknessRatioModel;
+    ratioFuncByThickness = rgcLayerProportion;
     
     % Obtain the total thickness of the RGC layer in mm
     rgciplOCTMm.thickMM.temporal = fliplr(rgciplOCTthickness(1:round(length(rgciplOCTthickness)/2)))./1000;
@@ -203,7 +203,7 @@ if p.Results.makeCellMaps
     
     % Obtain the function to express proportion of RGC+IPL thickness
     % that is RGC
-    ratioFuncByThickness = curcioThicknessRatioModel;
+    ratioFuncByThickness = rgcLayerProportion;
     
     
 end
@@ -262,8 +262,7 @@ if p.Results.showPlots
     plot(regularSupportPosDegVisual,midgetFraction,'-k');
     hold on
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDegVisual, 'linkingFuncParams', p.Results.midgetLinkingFuncParams );
-    halfRange = round(length(regularSupportPosDegVisual)/2);
-    plot(regularSupportPosDegVisual(1:halfRange),midgetFraction(1:halfRange),'-r');
+    plot(regularSupportPosDegVisual,midgetFraction,'-r');
     
 end
 
