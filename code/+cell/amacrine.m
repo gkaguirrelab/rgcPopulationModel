@@ -9,6 +9,9 @@ function amacrine = amacrine( cardinalMeridianAngles, cardinalMeridianNames )
 %   Curcio, Christine A., and Kimberly A. Allen. "Topography of ganglion
 %   cells in human retina." Journal of comparative Neurology 300.1 (1990):
 %   5-25.
+%
+% In Figure 3, Curcio & Allen note that displaced amacrine cells have soma
+% diameters of 9-14 microns
 
 for mm = 1:length(cardinalMeridianAngles)
     % Data from Curcio & Allen 1990, Figure 10, used for all meridians

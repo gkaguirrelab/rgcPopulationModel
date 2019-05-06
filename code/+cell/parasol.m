@@ -38,9 +38,9 @@ function parasol = parasol( cardinalMeridianAngles, cardinalMeridianNames, total
 
 
 %% Infer parasol densities
-% We have solid measurements of total RGC density and a solid estimate of
-% midget RGC density. The only parasol density measurements are from
-% macaque. We assume that:
+% We have solid measurements of total RGC density and an estimate of midget
+% RGC density. The only parasol density measurements are from macaque. We
+% assume that:
 %   densityParasol = densityTotalRGC - densityMidget - densityBistratified
 for mm = 1:length(cardinalMeridianAngles)
     parasol.density.fitDegSq.(cardinalMeridianNames{mm}) = @(x) totalRGC.density.fitDegSq.(cardinalMeridianNames{mm})(x')- ...
@@ -50,20 +50,29 @@ end
 
 
 % Parasol cell body sizes
-% Data from Perry et al. 1984, Figure 6C:
-%   Perry, V. H., R. Oehler, and A. Cowey. "Retinal ganglion cells that
-%   project to the dorsal lateral geniculate nucleus in the macaque
-%   monkey." Neuroscience 12.4 (1984): 1101-1123.
+% The first three values are taken from Figure 4B
 %
-% These are the diameters observed as a function of eccentricity in the
-% macauqe. Dacey 1993 reports that parasol cell bodies are 1.35 times
-% larger in the human than in the macaque. We scale up the diameter values
-% accordigly.
-parasol.diameter.supportMM = [0.53, 1.07, 1.47, 1.96, 2.5, 3.1, 3.5, 4.0, 4.55, 5.0, 5.53, 6.0, 6.47, 7.0, 7.53, 8.05, 9.0, 9.65, 10.33, 11.4, 12.66, 13.63, 14.21];
-parasol.diameter.supportDeg = convert_mmRetina_to_degVisual(parasol.diameter.supportMM, 180);
-parasol.diameter.sizeMM = 1.35.*[0.0153, 0.017, 0.0186, 0.0203, 0.02187, 0.0196, 0.0246, 0.0252, 0.027, 0.0282, 0.0298, 0.0304, 0.0316, 0.0323, 0.0328, 0.0317, 0.037, 0.0351, 0.0327, 0.0321, 0.0306, 0.0302, 0.02713];
-parasol.diameter.fitDeg = fit(parasol.diameter.supportDeg', parasol.diameter.sizeMM','poly1');
+%   Liu, Zhuolin, et al. "Imaging and quantifying ganglion cells and other
+%   transparent neurons in the living human retina." Proceedings of the
+%   National Academy of Sciences 114.48 (2017): 12803-12808.
+%
+% The 4th value is taken from Table 1 of:
+%
+%   Dacey, Dennis M. "Morphology of a small-field bistratified ganglion
+%   cell type in the macaque and human retina." Visual neuroscience 10.6
+%   (1993): 1081-1098.
+%
+% Lacking better data, I took the mean human parasol diameter value
+% reported by Dacey and assigned this to 30 degrees of eccentricity.
 
 
+parasol.diameter.supportDeg = [6.75 8.75 12.25 30];
+parasol.diameter.sizeMM = [0.01863 0.01888 0.02095 0.0233];
+fx = @(a,b,c,x) (a.*x).^b+c;
+
+parasol.diameter.fitDeg = fit(parasol.diameter.supportDeg', parasol.diameter.sizeMM',...
+    fx,'StartPoint', [0.001 1 0.018], ...
+    'Lower', [0 1 0]);
+    
 end
 

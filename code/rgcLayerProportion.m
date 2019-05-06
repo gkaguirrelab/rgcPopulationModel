@@ -50,7 +50,7 @@ function ratioFuncByThickness = rgcLayerProportion( varargin )
 %
 % Examples:
 %{
-    rgcLayerProportion('showPlots',true);
+    ratioFuncByThickness = rgcLayerProportion('showPlots',true);
 %}
 
 
