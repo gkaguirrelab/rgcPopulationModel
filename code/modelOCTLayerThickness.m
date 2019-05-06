@@ -221,9 +221,9 @@ fVal = max([nasalError temporalError]).^2;
 %% Figure prep
 if p.Results.showPlots
     
-    fig1 = figure();
-    fig2 = figure();
-    fig3 = figure();
+    for jj=1:4
+        figHandles{jj} = figure();
+    end
     
     for mm = 1:2
         meridian = cardinalMeridianNames{mm};
@@ -238,7 +238,7 @@ if p.Results.showPlots
         end
         
         % Plot counts
-        figure(fig1)
+        figure(figHandles{1})
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(midget.density.fitDegSq.(meridian)(supportDeg),toggle),'-r')
         hold on
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(parasol.density.fitDegSq.(meridian)(supportDeg),toggle),'-k')
@@ -246,49 +246,49 @@ if p.Results.showPlots
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(amacrine.density.fitDegSq.(meridian)(supportDeg),toggle),'-g')
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(ipRGC.density.fitDegSq.(meridian)(supportDeg),toggle),'-c')
         %plot(supportDeg, midget.density.fitDegSq.(meridian)(supportDeg) + parasol.density.fitDegSq.(meridian)(supportDeg) + bistratified.density.fitDegSq.(meridian)(supportDeg) +ipRGC.density.fitDegSq.(meridian)(supportDeg) + amacrine.density.fitDegSq.(meridian)(supportDeg),'xr')
-        xlabel('eccentricity [deg visual]');
+        xlabel('visual angle [deg]');
         ylabel('density [counts / sq visual deg]');
         legend({'midget','parasol','bistratified','amacrine','ipRGC'});
         xlim([-15 15]);
-        pbaspect([3 1 1])
+        pbaspect([4.58 1 1])
         box off
         grid off
         
         % Plot cell diameters
-        figure(fig2);
+        figure(figHandles{2});
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(midget.diameter.fitDeg(supportDeg),toggle),'-r')
         hold on
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(parasol.diameter.fitDeg(supportDeg),toggle),'-k')
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(bistratified.diameter.fitDeg(supportDeg),toggle),'-b')
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(amacrine.diameter.fitDeg(supportDeg),toggle),'-g')
-        plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(ipRGC.diameter.fitDeg(supportDeg),toggle),'-c')
-        xlabel('eccentricity [deg visual]');
-        ylabel('individual cell volume [mm^3]');
-        legend({'midget','parasol','bistratified','amacrine','ipRGC'});
+%        plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(ipRGC.diameter.fitDeg(supportDeg),toggle),'-c')
+        xlabel('visual angle [deg]');
+        ylabel('soma diameter [mm]');
+        legend({'midget','parasol','bistratified','amacrine'});
         xlim([-15 15]);
-        pbaspect([3 1 1])
+        pbaspect([4.58 1 1])
         box off
         grid off
         
         
         % Plot thickness
-        figure(fig3);
+        figure(figHandles{3});
         
         plot(toggle.*toggleFlip(rgcOCTMm.supportDeg.(meridian),toggle), toggleFlip(rgcOCTMm.thickMM.(meridian),toggle), '-r');
         hold on
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(calcRGCthickness.(meridian),toggle),'xk');
         legend({'RGC layer thickness OCT','Cell population model'});
-        xlabel('eccentricity [deg visual]');
+        xlabel('visual angle [deg]');
         ylabel('layer thickness [mm]]');
         ylim([0 0.08]);
         xlim([-15 15]);
-        pbaspect([3 1 1])
+        pbaspect([4.58 1 1])
         box off
         grid off
     end
     
     % Plot the midget fraction model
-    fig4 = figure();
+    figure(figHandles{4});
     regularSupportPosDegVisual = 0:0.1:15;
     rgcDensitySqDegVisual = totalRGC.density.fitDegSq.temporal(regularSupportPosDegVisual');
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDegVisual );
@@ -298,12 +298,22 @@ if p.Results.showPlots
     plot(regularSupportPosDegVisual,midgetFraction,'--r');
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDegVisual, 'linkingFuncParams', p.Results.midgetLinkingFuncParams );
     plot(regularSupportPosDegVisual,midgetFraction,'-k');
+            legend({'Dacey','Drasdo','current'});
+    xlabel('visual angle [deg]')
+    ylabel('Midget Fraction')
     ylim([0 1]);
     xlim([0 15]);
     pbaspect([1 2 1])
 
-    figNames = {'','','',''}
-    
+    % If the outputDir is not empty, save the figures
+    if ~isempty(p.Results.outDir)
+        figNames = {'modelFit_cellCounts.pdf','modelFit_cellDiameters.pdf','modelFit_cellThickness.pdf','modelFit_midgetFraction.pdf'};
+        for jj=1:4
+            filename = fullfile(p.Results.outDir,figNames{jj});
+            print(figHandles{jj},filename,'-dpdf')
+            close(figHandles{jj})
+        end
+    end
 end
 
 end % rgcThickness function
