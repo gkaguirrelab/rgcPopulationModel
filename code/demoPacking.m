@@ -4,14 +4,14 @@
 % V = rand(25,3);
 
 
-
+maxDensity = 0;
 density = 0;
-while density < 0.35
+while density < 0.43
 % Generate 100 random 3d points in the unit cube
 V = rand(50,3);
 % Construct their Delaunay triangulation: tetrahedral mesh
 T = delaunay(V(:,1),V(:,2),V(:,3));
-% Gather all edges of the tet mesh
+% Gather all edges of the the mesh
 E = [ T(:,1) T(:,2); T(:,2) T(:,3); T(:,3) T(:,4); T(:,4) T(:,1)];
 % include both edge directions
 E = [E; fliplr(E)];
@@ -32,9 +32,12 @@ rMedian = median(r);
 % set up color
 c = V*0;
 c(r<rMedian,:)=repmat([1 0 0],size(c(r<rMedian,:),1),1);
-c(r>=rMedian,:)=repmat([0.5 0.5 0.5],size(c(r>=rMedian,:),1),1);
+c(r>=rMedian,:)=repmat([1 0 0],size(c(r>=rMedian,:),1),1);
 % Obtain the packing density
 density = sum(4/3*pi.*r.^3);
+if density > maxDensity
+    maxDensity = density
+end
 end
 
 % adjust sizes

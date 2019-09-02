@@ -11,7 +11,7 @@
 		"toolboxRoot": "",
 		"type": "git",
 		"update": "",
-		"url": ""
+		"url": "https:\/\/github.com\/gkaguirrelab\/rgcPopulationModel.git"
 	},
  	{
 		"flavor": "",
@@ -21,26 +21,10 @@
 		"name": "rgcDisplacementMap",
 		"pathPlacement": "append",
 		"subfolder": "",
-		"toolboxRoot": "",
+		"toolboxRoot": "#",
 		"type": "git",
 		"update": "",
 		"url": "https:\/\/github.com\/gkaguirrelab\/rgcDisplacementMap.git"
-	},
-	{
-		"flavor": "",
-		"hook": "",
-		"importance": "",
-		"localHookTemplate": "",
-		"name": "functional_programming",
-		"pathPlacement": "append",
-		"subfolder": "",
-		"toolboxRoot": "",
-		"type": "webget",
-		"update": "",
-		"url": "https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/39735/versions/4/download/zip"
 	}
-
-
-
 ]
 

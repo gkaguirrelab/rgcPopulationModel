@@ -1,44 +1,77 @@
-function bistratified = bistratified( cardinalMeridianAngles, cardinalMeridianNames, totalRGC )
-% Model of volume of bistratfied ganglion cells in the RGC layer.
-%   Digitized data from Dacey's publications concerning morphology of
-%   bistratified ganglion cells allows us to calculate how much the volume
-%   of bistratified cells contributes to the overall RGC layer thickness
-%   from data concerning bistratified cells density varying with
-%   eccentricity across all meridians, and the cells' mean size.
+function bistratified = bistratified( totalRGC, showPlots )
+% Size and count functions for the bistratified RGC class
+%
+% Syntax:
+%  bistratified = cell.bistratified( totalRGC, showPlots )
+%
+% Description:
+%   Returns an array of structures, where each structure has a handle to a
+%   function that returns cell counts (per degree squared) and cell
+%   diameter (in mm) as a function of retinal eccentricity (in degrees).
+%   Requires as input the output of the function cell.totalRGC.
+%
+
+% Handle plotting
+if nargin==1
+    showPlots = false;
+end
+
+if showPlots
+    figure
+end
 
 
-
-%% Bistratified RGCs
-
-% Bistratified proportion
+%% Cell counts
 % Data from Dacey 1993, Figure 13b:
+%
 %   Dacey, Dennis M. "Morphology of a small-field bistratified ganglion
 %   cell type in the macaque and human retina." Visual neuroscience 10.6
 %   (1993): 1081-1098.
 %
+% Digitized data from Dacey's publications concerning morphology of
+% bistratified ganglion cells allows us to calculate how much the volume of
+% bistratified cells contributes to the overall RGC layer thickness from
+% data concerning bistratified cells density varying with eccentricity
+% across all meridians, and the cells' mean size.
+%
 % Dacey provided values for the temporal retina; we assume these values
 % hold for all meridians
-for mm = 1:length(cardinalMeridianAngles)
-    bistratified.proportion.supportMM.(cardinalMeridianNames{mm}) = [0, .97, 1.96, 2.91, 3.92, 4.91, 5.92, 6.89, 7.84, 8.85, 9.86, 10.89, 11.9, 12.91, 13.84, 14.91];
-    bistratified.proportion.value.(cardinalMeridianNames{mm}) = [0, .0135, .0168, .0202, .0241, .0284, .0324, .0364, .0403, .0447, .0485, .0538, .0573, .0603, .0641, .0662];
 
-    % Convert retinal mm to degrees visual field
-    bistratified.proportion.supportDeg.(cardinalMeridianNames{mm}) = convert_mmRetina_to_degVisual(bistratified.proportion.supportMM.(cardinalMeridianNames{mm}), cardinalMeridianAngles(mm));
+% Loop over the specified meridians
+for mm = 1:length(totalRGC)
+
+    % Set up this meridian model element
+    bistratified(mm).label = totalRGC(mm).label;
+    bistratified(mm).angle = totalRGC(mm).angle;
+
+    % Data from Dacey 1993, used for all meridians
+    supportMM = [0, .97, 1.96, 2.91, 3.92, 4.91, 5.92, 6.89, 7.84, 8.85, 9.86, 10.89, 11.9, 12.91, 13.84, 14.91];
+    proportion = [0, .0135, .0168, .0202, .0241, .0284, .0324, .0364, .0403, .0447, .0485, .0538, .0573, .0603, .0641, .0662];
+
+    % Convert retinal mm to visual degrees
+    supportDeg = convert_mmRetina_to_degVisual(supportMM, bistratified(mm).angle);
+
+    % Convert proportions to counts
+    countsDegSq = proportion .* totalRGC(mm).countsDegSq(supportDeg);
+    
+    % Obtain a spline fit to the cell densities
+    nonNan = ~isnan(countsDegSq);
+    splineFit = fit(supportDeg(nonNan)', countsDegSq(nonNan)', 'cubicinterp');
+    
+    % Nan optic disc points and save the anonymous function
+    bistratified(mm).countsDegSq = @(posDeg) ...        
+        nanOpticDiscPoints(splineFit(posDeg), posDeg, bistratified(mm).angle);
+
+    if showPlots
+        plot(0:0.5:50,bistratified(mm).countsDegSq(0:0.5:50));
+        hold on
+        plot(supportDeg,countsDegSq,'*');
+    end
     
 end
 
-% Obtain a spline fit to the bistratified densities
-for mm = 1:length(cardinalMeridianAngles)
-    nonNanSupportIdx = ~isnan(bistratified.proportion.value.(cardinalMeridianNames{mm}));
-    tmpSupport = bistratified.proportion.supportDeg.(cardinalMeridianNames{mm})(nonNanSupportIdx)';
-    bistratified.density.fitDegSq.(cardinalMeridianNames{mm}) = ...
-        fit( [0; tmpSupport], ...        
-        [0; totalRGC.density.fitDegSq.(cardinalMeridianNames{mm})(tmpSupport)' .* ...
-        bistratified.proportion.value.(cardinalMeridianNames{mm})(nonNanSupportIdx)'], ...
-        'smoothingspline');
-end
 
-% Bistratified cell body sizes
+%% Cell diameters
 % Data from Figure 3B:
 %   Peterson, Beth B., and Dennis M. Dacey. "Morphology of wide-field
 %   bistratified and diffuse human retinal ganglion cells." Visual
@@ -50,9 +83,10 @@ end
 %   cell type in the macaque and human retina." Visual neuroscience 10.6
 %   (1993): 1081-1098.
 %
-% We model the cell body diameter as constant as a function of
-% eccentricity.
-bistratified.diameter.fitDeg = @(x) repmat(0.0189,size(x));
+for mm = 1:length(totalRGC)
+    bistratified(mm).diameter = @(x) repmat(0.0189,size(x))';
+end
+
 
 end
 

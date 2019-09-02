@@ -1,35 +1,74 @@
-function ipRGC = ipRGC( cardinalMeridianAngles, cardinalMeridianNames )
-
-%% ipRGCs
-%   Dacey, Dennis M., et al. "Melanopsin-expressing ganglion cells in
-%   primate retina signal colour and irradiance and project to the LGN."
-%   Nature 433.7027 (2005): 749.
+function ipRGC = ipRGC(showPlots)
+% Size and count functions for the ipRGC class
 %
-% Data from staining instrinsically photosensitive retinal ganglion cells
-% in human retinas. Note that 60% of all ipRGCs have outer stratifying
-% dendritic fields, and 40% of these outer stratifying ipRGCs have their
-% cell bodies lying within the inner plexiform layer. Thus, onlly 76% of
-% the the total ipRGC count (1-0.6*0.4) should be considered as residing
-% within the retinal ganglion cell layer
+% Syntax:
+%  ipRGC = cell.ipRGC(showPlots)
+%
+% Description:
+%   Returns an array of structures, where each structure has a handle to a
+%   function that returns cell counts (per degree squared) and cell
+%   diameter (in mm) as a function of retinal eccentricity (in degrees).
+%
 
-ipRGCpropInRGCLayer = 0.76;
-
-% Density info
-for mm = 1:length(cardinalMeridianAngles)
-    % Data from Dacey 2005, Figure 1G, used for all meridians
-    ipRGC.density.supportMM.(cardinalMeridianNames{mm}) = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
-    ipRGC.density.countsMMSq.(cardinalMeridianNames{mm}) = ipRGCpropInRGCLayer.*[0, 21.06, 15.36, 12.02 8.27, 5.95, 8.46, 5.87, 5.96, 5.31, 5.78, 4.99, 4.67, 7.55, 4.86, 6.21, 4.03];
-
-    % Convert retinal mm to visual degrees
-    ipRGC.density.supportDeg.(cardinalMeridianNames{mm}) = convert_mmRetina_to_degVisual(ipRGC.density.supportMM.(cardinalMeridianNames{mm}), 180);
-    ipRGC.density.countsDegSq.(cardinalMeridianNames{mm}) = ipRGC.density.countsMMSq.(cardinalMeridianNames{mm}) .* calc_mmSqRetina_per_degSqVisual(ipRGC.density.supportDeg.(cardinalMeridianNames{mm}), 180);
-    
-    % Obtain a spline fit to the ipRGC densities
-    ipRGC.density.fitDegSq.(cardinalMeridianNames{mm}) = ...
-        fit(ipRGC.density.supportDeg.(cardinalMeridianNames{mm})', ipRGC.density.countsDegSq.(cardinalMeridianNames{mm})', 'smoothingspline');
+% Handle plotting
+if nargin==0
+    showPlots = false;
 end
 
-% Size info here
+if showPlots
+    figure
+end
+
+% The meridians over which the calculation is to be performed
+cardinalMeridianAngles = [0 90 180 270];
+cardinalMeridianNames = {'nasal' 'superior' 'temporal' 'inferior'};
+
+%% Cell counts
+% Data taken from:
+%
+%	Dacey, Dennis M., et al. "Melanopsin-expressing ganglion cells in
+%	primate retina signal colour and irradiance and project to the LGN."
+%	Nature 433.7027 (2005): 749.
+%
+% Note that 60% of all ipRGCs have outer stratifying dendritic fields, and
+% 40% of these outer stratifying ipRGCs have their cell bodies lying within
+% the inner plexiform layer. Thus, onlly 76% of the the total ipRGC count
+% (1-0.6*0.4) should be considered as residing within the retinal ganglion
+% cell layer
+ipRGCpropInRGCLayer = 0.76;
+
+% Loop over the specified meridians
+for mm = 1:length(cardinalMeridianAngles)
+    
+    % Data from Dacey 2005, Figure 1G, used for all meridians
+    supportMM = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    countsMMSq = ipRGCpropInRGCLayer.*[0, 21.06, 15.36, 12.02 8.27, 5.95, 8.46, 5.87, 5.96, 5.31, 5.78, 4.99, 4.67, 7.55, 4.86, 6.21, 4.03];
+
+    % Convert retinal mm to visual degrees
+    supportDeg = convert_mmRetina_to_degVisual(supportMM, cardinalMeridianAngles(mm));
+    countsDegSq = countsMMSq .* calc_mmSqRetina_per_degSqVisual(supportDeg, cardinalMeridianAngles(mm));
+    
+    % Obtain a fit to the cell densities
+    splineFit = fit(supportDeg', countsDegSq', 'cubicinterp');
+    
+    % Set up this meridian model element
+    ipRGC(mm).label = cardinalMeridianNames(mm);
+    ipRGC(mm).angle = cardinalMeridianAngles(mm);
+    
+    % Nan optic disc points and save the anonymous function
+    ipRGC(mm).countsDegSq = @(posDeg) ...        
+        nanOpticDiscPoints(splineFit(posDeg), posDeg, cardinalMeridianAngles(mm));
+
+    if showPlots
+        plot(0:0.5:50,ipRGC(mm).countsDegSq(0:0.5:50));
+        hold on
+        plot(supportDeg,countsDegSq,'*');
+    end
+    
+end
+
+
+%% Cell diameters
 % Data collected by combining reported information on human ipRGCs from
 % Dkhissi-Benyahya and Do each of which reported varying scales of soma
 % diameter for melanopsin containing ganglion cells. The range of 15-20um
@@ -47,7 +86,9 @@ end
 %   Do, Michael Tri Hoang, and King-Wai Yau. "Intrinsically photosensitive
 %   retinal ganglion cells." Physiological reviews 90.4 (2010): 1547-1581.
 %
-ipRGC.diameter.fitDeg = @(x) repmat(0.017,size(x));
+for mm = 1:length(cardinalMeridianAngles)
+    ipRGC(mm).diameter = @(x) repmat(0.017,size(x))';
+end
 
 end
 

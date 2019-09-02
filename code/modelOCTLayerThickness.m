@@ -69,9 +69,9 @@ function fVal=modelOCTLayerThickness(varargin )
     % Search across both packing density and midget fraction params
     modelOCTLayerThickness('forceRecalculate',true,'showPlots',false);
     myObj = @(p) modelOCTLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false,'objectiveType','all');
-    x0=[12.0290, 0.4320   0.4171    0.9483  0.4809];
+    x0=[12.0290, 0.4320   0.4171    0.9483  0.6122];
     ub=[15 0.7 0.6 1.0 0.7];
-    lb=[1 0.1 0.2 0.9 0.4];
+    lb=[1 0.1 0.2 0.9 0.6];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
     modelOCTLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false,'objectiveType','all');
 %}
@@ -84,9 +84,9 @@ p.addParameter('polarAngle',180,@isnumeric);
 p.addParameter('cardinalMeridianAngles',[0 90 180 270],@isnumeric);
 p.addParameter('cardinalMeridianNames',{'nasal' 'superior' 'temporal' 'inferior'},@iscell);
 p.addParameter('midgetLinkingFuncParams',[7.6048    0.4771    0.4060    0.9266],@isnumeric); % Best fit to the OCT data
-p.addParameter('supportDegNasal',(0.75:.25:10)',@isnumeric);
-p.addParameter('supportDegTemporal',(0.75:.25:15)',@isnumeric);
-p.addParameter('packingDensity',0.4352,@isscalar);  % Best fit to the OCT data
+p.addParameter('supportDegNasal',(0.25:.25:25)',@isnumeric);
+p.addParameter('supportDegTemporal',(0.25:.25:25)',@isnumeric);
+p.addParameter('packingDensity',0.6122,@isscalar);  % Best fit to the OCT data
 p.addParameter('objectiveType','all',@ischar);
 p.addParameter('forceRecalculate',true,@islogical);
 p.addParameter('showPlots',true,@islogical);
@@ -112,7 +112,7 @@ midget = cell.midget(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridia
 parasol = cell.parasol(p.Results.cardinalMeridianAngles, p.Results.cardinalMeridianNames, totalRGC, midget, bistratified);
 
 %% Obtain the TOME OCT thickness measurements
-persistent rgcOCTMm ratioFuncByThickness
+persistent rgcOCTMm ratioFuncByThickness referenceCumSumThick
 if isempty(rgcOCTMm) || p.Results.forceRecalculate
     % Load the OCT data
     load(p.Results.octDataFileName,'rgcIplThicknessMap');
@@ -128,7 +128,7 @@ if isempty(rgcOCTMm) || p.Results.forceRecalculate
     
     % Obtain the function to express proportion of RGC+IPL thickness
     % that is RGC
-    ratioFuncByThickness = rgcLayerProportion;
+    [ratioFuncByThickness, referenceCumSumThick] = rgcLayerProportion;
     
     % Obtain the total thickness of the RGC layer in mm
     rgciplOCTMm.thickMM.temporal = fliplr(rgciplOCTthickness(1:round(length(rgciplOCTthickness)/2)))./1000;
@@ -144,8 +144,23 @@ if isempty(rgcOCTMm) || p.Results.forceRecalculate
     rgcOCTMm.supportDeg.nasal = rgcOCTMm.supportDeg.nasal(notNanIdx);
     
     % Obtain the rgc component
-    rgcOCTMm.thickMM.temporal = rgciplOCTMm.thickMM.temporal .* ratioFuncByThickness(rgcOCTMm.supportDeg.temporal,rgciplOCTMm.thickMM.temporal);
-    rgcOCTMm.thickMM.nasal = rgciplOCTMm.thickMM.nasal .* ratioFuncByThickness(rgcOCTMm.supportDeg.nasal,rgciplOCTMm.thickMM.nasal);
+    rgcOCTMm.thickMM.temporal = rgciplOCTMm.thickMM.temporal .* ratioFuncByThickness(rgcOCTMm.supportDeg.temporal,rgciplOCTMm.thickMM.temporal,referenceCumSumThick);
+    rgcOCTMm.thickMM.nasal = rgciplOCTMm.thickMM.nasal .* ratioFuncByThickness(rgcOCTMm.supportDeg.nasal,rgciplOCTMm.thickMM.nasal,referenceCumSumThick);
+    
+    load('/Users/aguirre/Dropbox (Aguirre-Brainard Lab)/AOSO_analysis/OCTExplorerExtendedHorizontalData/LineAnalysisResults.mat');
+    rgcOCTMm.thickMM.temporal = meanGCVec(XPos_Degs<=0)'./1000;
+    rgcOCTMm.supportDeg.temporal = abs(XPos_Degs(XPos_Degs<=0));
+    rgcOCTMm.thickMM.nasal = meanGCVec(XPos_Degs>=0)'./1000;
+    rgcOCTMm.supportDeg.nasal = abs(XPos_Degs(XPos_Degs>=0));
+    
+    % Remove nans from the data and corresponding support
+    notNanIdx = ~isnan(rgcOCTMm.thickMM.temporal);
+    rgcOCTMm.thickMM.temporal = rgcOCTMm.thickMM.temporal(notNanIdx);
+    rgcOCTMm.supportDeg.temporal = rgcOCTMm.supportDeg.temporal(notNanIdx);
+    
+    notNanIdx = ~isnan(rgcOCTMm.thickMM.nasal);
+    rgcOCTMm.thickMM.nasal = rgcOCTMm.thickMM.nasal(notNanIdx);
+    rgcOCTMm.supportDeg.nasal = rgcOCTMm.supportDeg.nasal(notNanIdx);    
     
     % Obtain a spline fit to the thickness measurements
     for mm = [1 3]
@@ -185,12 +200,17 @@ for mm=1:2
 end
 
 % Objective for the nasal and temporal meridians
+opticDiscIndices = findOpticDiscPositions(supportDegNasal, 0);
 switch p.Results.objectiveType
     case 'all'
-        nasalError = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDegNasal') - calcRGCthickness.nasal).^2));
+        errorA = (rgcOCTMm.fitDeg.nasal(supportDegNasal') - calcRGCthickness.nasal).^2;
+        errorA(opticDiscIndices)=nan;
+        nasalError = sqrt(nansum(errorA));        
         temporalError = sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDegTemporal') - calcRGCthickness.temporal).^2));
     case 'shape'
-        nasalError = sqrt(sum((rgcOCTMm.fitDeg.nasal(supportDegNasal')./max(rgcOCTMm.fitDeg.nasal(supportDegNasal')) - calcRGCthickness.nasal./max(calcRGCthickness.nasal)).^2));
+        errorA = (rgcOCTMm.fitDeg.nasal(supportDegNasal')./max(rgcOCTMm.fitDeg.nasal(supportDegNasal')) - calcRGCthickness.nasal./max(calcRGCthickness.nasal)).^2;
+        errorA(opticDiscIndices)=nan;        
+        nasalError = sqrt(nansum(errorA));        
         temporalError = sqrt(sum((rgcOCTMm.fitDeg.temporal(supportDegTemporal')./max(rgcOCTMm.fitDeg.temporal(supportDegTemporal')) - calcRGCthickness.temporal./max(calcRGCthickness.temporal)).^2));
     case 'magnitude'
         nasalError =  sqrt( (max(rgcOCTMm.fitDeg.nasal(supportDegNasal')) - max(calcRGCthickness.nasal)).^2);
@@ -239,8 +259,9 @@ if p.Results.showPlots
         
         % Plot counts
         figure(figHandles{1})
-        plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(midget.density.fitDegSq.(meridian)(supportDeg),toggle),'-r')
+        plot(toggle.*toggleFlip(supportDeg,toggle), totalRGC.density.fitDegSq.(meridian)(supportDeg),'-k')
         hold on
+        plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(midget.density.fitDegSq.(meridian)(supportDeg),toggle),'-r')
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(parasol.density.fitDegSq.(meridian)(supportDeg),toggle),'-k')
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(bistratified.density.fitDegSq.(meridian)(supportDeg),toggle),'-b')
         plot(toggle.*toggleFlip(supportDeg,toggle), toggleFlip(amacrine.density.fitDegSq.(meridian)(supportDeg),toggle),'-g')
@@ -249,7 +270,8 @@ if p.Results.showPlots
         xlabel('visual angle [deg]');
         ylabel('density [counts / sq visual deg]');
         legend({'midget','parasol','bistratified','amacrine','ipRGC'});
-        xlim([-15 15]);
+        xlim([-25 25]);
+        ylim([0 2500]);
         pbaspect([4.58 1 1])
         box off
         grid off
@@ -265,7 +287,7 @@ if p.Results.showPlots
         xlabel('visual angle [deg]');
         ylabel('soma diameter [mm]');
         legend({'midget','parasol','bistratified','amacrine'});
-        xlim([-15 15]);
+        xlim([-25 25]);
         pbaspect([4.58 1 1])
         box off
         grid off
@@ -281,28 +303,30 @@ if p.Results.showPlots
         xlabel('visual angle [deg]');
         ylabel('layer thickness [mm]]');
         ylim([0 0.08]);
-        xlim([-15 15]);
+        xlim([-25 25]);
         pbaspect([4.58 1 1])
         box off
         grid off
     end
     
+    drawnow
+    
     % Plot the midget fraction model
     figure(figHandles{4});
-    regularSupportPosDegVisual = 0:0.1:15;
+    regularSupportPosDegVisual = 0:0.1:20;
     rgcDensitySqDegVisual = totalRGC.density.fitDegSq.temporal(regularSupportPosDegVisual');
-    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDegVisual );
-    plot(regularSupportPosDegVisual,midgetFraction,'-r');
+    [~, daceyMidgetFraction, daceyDataSupportPosDegVisual] = calcDaceyMidgetFractionByEccenDegVisual(regularSupportPosDegVisual);
+    plot(daceyDataSupportPosDegVisual,daceyMidgetFraction,'or');
     hold on
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( regularSupportPosDegVisual, rgcDensitySqDegVisual );
     plot(regularSupportPosDegVisual,midgetFraction,'--r');
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( regularSupportPosDegVisual, rgcDensitySqDegVisual, 'linkingFuncParams', p.Results.midgetLinkingFuncParams );
     plot(regularSupportPosDegVisual,midgetFraction,'-k');
-            legend({'Dacey','Drasdo','current'});
+    legend({'Dacey','Drasdo','current'},'Location','southwest');
     xlabel('visual angle [deg]')
     ylabel('Midget Fraction')
-    ylim([0 1]);
-    xlim([0 15]);
+    ylim([0.5 1]);
+    xlim([0 25]);
     pbaspect([1 2 1])
 
     % If the outputDir is not empty, save the figures
@@ -311,10 +335,13 @@ if p.Results.showPlots
         for jj=1:4
             filename = fullfile(p.Results.outDir,figNames{jj});
             print(figHandles{jj},filename,'-dpdf')
-            close(figHandles{jj})
         end
     end
 end
+
+
+
+
 
 end % rgcThickness function
 
