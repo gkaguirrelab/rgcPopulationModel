@@ -3,7 +3,8 @@
 		"flavor": "",
 		"hook": "",
 		"importance": "",
-		"localHookTemplate": "configuration/rgcPopulationModelLocalHook",
+		"localHookTemplate": "config/rgcPopulationModelLocalHook",
+		"printLocalHookOutput": "1",
 		"name": "rgcPopulationModel",
 		"pathPlacement": "append",
 		"subfolder": "code",
@@ -21,9 +22,9 @@
 		"pathPlacement": "append",
 		"subfolder": "",
 		"toolboxRoot": "",
-		"type": "include",
+		"type": "git",
 		"update": "",
-		"url": ""
+		"url": "https:\/\/github.com\/gkaguirrelab\/rgcDisplacementMap.git"
 	},
 	{
 		"flavor": "",
