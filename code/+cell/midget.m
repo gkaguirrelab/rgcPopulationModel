@@ -109,7 +109,7 @@ for mm = 1:length(totalRGC)
     % Support in the source data is in degrees of visual field along the
     % temporal retina
     supportDeg = [(1.5+3)/2, (3+4.5)/2, (6+7.5)/2, (8+9.5)/2, (12+13.5)/2];
-    sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315].*1.15;
+    sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315];
 
     % Obtain the fit and save. We find that an exponential does best with
     % the impoverished set of measurements we have

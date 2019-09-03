@@ -60,9 +60,9 @@ function fVal=modelGCLayerThickness(varargin )
 %{
     % Search across model params to fit the data
     myObj = @(p) modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false);
-    x0=[12, 0.5, 0.41, 0.95 0.7];
-    ub=[12 0.6 0.6 1.0 0.9];
-    lb=[12 0.4 0.2 0.9 0.5];
+    x0=[12, 0.5, 0.41, 0.95 0.6];
+    ub=[12 0.6 0.6 1.0 0.8];
+    lb=[12 0.4 0.3 0.8 0.5];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
     modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false);
 %}
@@ -71,8 +71,8 @@ function fVal=modelGCLayerThickness(varargin )
 p = inputParser;
 
 % Optional analysis params
-p.addParameter('midgetLinkingFuncParams',[12, 0.5, 0.41, 0.95],@isnumeric); % Best fit to the OCT data
-p.addParameter('packingDensity',0.7,@isscalar);  % Best fit to the OCT data
+p.addParameter('midgetLinkingFuncParams',[12, 0.5, 0.4, 0.9],@isnumeric); % Best fit to the OCT data
+p.addParameter('packingDensity',0.6,@isscalar);  % Best fit to the OCT data
 p.addParameter('forceRecalculate',true,@islogical);
 p.addParameter('showPlots',true,@islogical);
 p.addParameter('outDir','~/Desktop/KaraCloud_VSS2019_figs',@ischar);
@@ -81,7 +81,10 @@ p.addParameter('outDir','~/Desktop/KaraCloud_VSS2019_figs',@ischar);
 p.parse(varargin{:})
 
 % Obtain the ganglion cell thickness data
-data = prepareGCThickData();
+thickData = prepareGCThickData();
+
+% Obtain the mean ganglion cell size data
+sizeData = prepareMeanCellSizeData();
 
 % Obtain the cell population components from the individual functions
 % This first set are invariant with respect to the midget fraction
@@ -102,42 +105,82 @@ sVol = @(d) 4/3*pi*(d./2).^3;
 
 % Loop over the meridians provided in the data. Build the model and obtain
 % the error.
-fVal = 0;
-for mm=1:length(data)
+fValThick = 0;
+fValSize = 0;
+for mm=1:length(thickData)
     
-    % Prepare this entry of the model
-    model(mm).label = data(mm).label;
-    model(mm).angle = data(mm).angle;
+    % Prepare this entry of the models
+    thickModel(mm).label = thickData(mm).label;
+    thickModel(mm).angle = thickData(mm).angle;
+    
+    sizeModel(mm).label = sizeData(mm).label;
+    sizeModel(mm).angle = sizeData(mm).angle;
     
     % Find the matching cell component entry
-    idx = strcmp([totalRGC(:).label],data(mm).label);
-
+    idx = strcmp([totalRGC(:).label],thickData(mm).label);
+    
     % The model thickness is the sum of the layer components
-    model(mm).thickMM = @(x) ((...
+    thickModel(mm).thickMM = @(x) ((...
         amacrine(idx).countsDegSq(x) .* sVol(amacrine(idx).diameter(x)) + ...
         parasol(idx).countsDegSq(x) .* sVol(parasol(idx).diameter(x)) + ...
         bistratified(idx).countsDegSq(x) .* sVol(bistratified(idx).diameter(x)) + ...
         midget(idx).countsDegSq(x) .* sVol(midget(idx).diameter(x)) + ...
         ipRGC(idx).countsDegSq(x) .* sVol(ipRGC(idx).diameter(x)) ...
         )) ./ p.Results.packingDensity ./ calc_mmSqRetina_per_degSqVisual(x',totalRGC(mm).angle);
-
-    % Evaluate the model at the data locations
-    dataModelDif = data(mm).thickMM - model(mm).thickMM(data(mm).supportDeg);
-    fVal = fVal + sqrt(nansum(dataModelDif.^2));
     
+    % The modeled mean cell size is the weighted mean of the cell sizes
+    sizeModel(mm).diameter = @(x)  ((...
+        amacrine(idx).countsDegSq(x) .* amacrine(idx).diameter(x) + ...
+        parasol(idx).countsDegSq(x) .* parasol(idx).diameter(x) + ...
+        bistratified(idx).countsDegSq(x) .* bistratified(idx).diameter(x) + ...
+        midget(idx).countsDegSq(x) .* midget(idx).diameter(x) + ...
+        ipRGC(idx).countsDegSq(x) .* ipRGC(idx).diameter(x) ...
+        )) ./ ((...
+        amacrine(idx).countsDegSq(x) + ...
+        parasol(idx).countsDegSq(x) + ...
+        bistratified(idx).countsDegSq(x) + ...
+        midget(idx).countsDegSq(x) + ...
+        ipRGC(idx).countsDegSq(x) ...
+        ));
+    
+    
+    % Evaluate the model at the data locations
+    dataModelThickDif = thickData(mm).thickMM - thickModel(mm).thickMM(thickData(mm).supportDeg);
+    dataModelSizeDif = sizeData(mm).diameter - sizeModel(mm).diameter(sizeData(mm).supportDeg);
+    
+    fValThick = fValThick + sqrt(nansum(dataModelThickDif.^2));
+    fValSize = fValSize + sqrt(nansum(dataModelSizeDif.^2));
+    
+    fVal = fValThick * fValSize;
 end
 
 if p.Results.showPlots
+    
+    % Plot the thickness model fit
     figure
     supportDeg = 0:0.1:25;
-    for mm = 1:length(data)
+    for mm = 1:length(thickData)
         subplot(2,1,mm)
-        plot(data(mm).supportDeg,data(mm).thickMM,'xk');
+        plot(thickData(mm).supportDeg,thickData(mm).thickMM,'xk');
         hold on
-        plot(supportDeg,model(mm).thickMM(supportDeg),'-r');
-        title(model(mm).label)
+        plot(supportDeg,thickModel(mm).thickMM(supportDeg),'-r');
+        title(['GC thickness - ' thickModel(mm).label])
+        drawnow
     end
-    drawnow
+    
+    % Plot the mean size model fit
+    figure
+    supportDeg = 0:0.1:40;
+    for mm = 1:length(sizeData)
+        subplot(2,1,mm)
+        plot(sizeData(mm).supportDeg,sizeData(mm).diameter,'xk');
+        hold on
+        plot(supportDeg,sizeModel(mm).diameter(supportDeg),'-r');
+        title(['Mean GC size - ' sizeModel(mm).label])
+        ylim([0 0.02]);
+        xlim([0 40]);
+        drawnow
+    end
     
     % Plot the midget fraction model
     figure
@@ -158,5 +201,5 @@ if p.Results.showPlots
     pbaspect([1 2 1])
 end
 
-end 
+end
 
