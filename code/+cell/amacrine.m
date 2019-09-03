@@ -2,21 +2,21 @@ function amacrine = amacrine(showPlots)
 % Size and count functions for the amacrine cell class
 %
 % Syntax:
-%  ipRGC = cell.amacrine()
+%  amacrine = cell.amacrine(showPlots)
 %
 % Description:
 %   Returns an array of structures, where each structure has a handle to a
 %   function that returns cell counts (per degree squared) and cell
 %   diameter (in mm) as a function of retinal eccentricity (in degrees).
 %
+% Examples:
+%{
+    amacrine = cell.amacrine(true);
+%}
 
 % Handle plotting
 if nargin==0
     showPlots = false;
-end
-
-if showPlots
-    figure
 end
 
 % The meridians over which the calculation is to be performed
@@ -58,6 +58,9 @@ for mm = 1:length(cardinalMeridianAngles)
         nanOpticDiscPoints(splineFit(posDeg), posDeg, cardinalMeridianAngles(mm));
     
     if showPlots
+        if mm == 1
+            figure
+        end
         plot(0:0.5:50,amacrine(mm).countsDegSq(0:0.5:50));
         hold on
         plot(supportDeg,countsDegSq,'*');
@@ -87,7 +90,16 @@ for mm = 1:length(cardinalMeridianAngles)
     supportDeg = convert_mmRetina_to_degVisual(supportMM,cardinalMeridianAngles(mm));
     
     % Obtain the fit and save
-    amacrine(mm).diameter = fit(supportDeg',sizeMM','cubicinterp');
-
+    amacrine(mm).diameter = fit(supportDeg',sizeMM','poly3');
+    
+    if showPlots
+        if mm == 1
+            figure
+        end
+        plot(supportDeg,sizeMM,'*');
+        hold on
+        plot(0:0.5:70,amacrine(mm).diameter(0:0.5:70));
+    end
+    
 end
 

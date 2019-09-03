@@ -9,16 +9,16 @@ function totalRGC = totalRGC(showPlots)
 %   function that returns cell counts (per degree squared) as a function of
 %   retinal eccentricity (in degrees).
 %
-
+% Examples:
+%{
+    totalRGC = cell.totalRGC(true)
+%}
 
 % Handle plotting
 if nargin==0
     showPlots = false;
 end
 
-if showPlots
-    figure
-end
 
 % The meridians over which the calculation is to be performed
 cardinalMeridianAngles = [0 90 180 270];
@@ -46,6 +46,9 @@ for mm = 1:length(cardinalMeridianAngles)
         nanOpticDiscPoints(splineFit(posDeg), posDeg, cardinalMeridianAngles(mm));
 
     if showPlots
+        if mm == 1;
+            figure
+        end
         plot(0:0.5:50,totalRGC(mm).countsDegSq(0:0.5:50));
         hold on
     end

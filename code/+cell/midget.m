@@ -9,19 +9,20 @@ function midget = midget( totalRGC, midgetLinkingFuncParams, showPlots )
 %   function that returns cell counts (per degree squared) and cell
 %   diameter (in mm) as a function of retinal eccentricity (in degrees).
 %
+% Examples:
+%{
+	totalRGC = cell.totalRGC();
+	midget = cell.midget( totalRGC, [12, 0.7, 0.41, 0.95], true );
+%}
 
 % Handle plotting and missing midgetLinkingFuncParams
 if nargin==1
-    midgetLinkingFuncParams = [12.0290, 0.4320];
+    midgetLinkingFuncParams = [12, 0.5, 0.41, 0.95];
     showPlots = false;
 end
 
 if nargin==2
     showPlots = false;
-end
-
-if showPlots
-    figure
 end
 
 % Define a maximum eccentricity of the model
@@ -73,8 +74,14 @@ for mm = 1:length(totalRGC)
 
     % Plot the fit
     if showPlots
-        plot(supportDeg,midget(mm).countsDegSq(supportDeg));
+        if mm == 1
+            figure
+        end
+        subplot(ceil(length(totalRGC)/2),ceil(length(totalRGC)/2),mm)
+        plot(supportDeg,countsDegSqTotal,'-k');
         hold on
+        plot(supportDeg,midget(mm).countsDegSq(supportDeg),'-r');
+        title(totalRGC(mm).label);
     end
 
 end
@@ -88,10 +95,13 @@ end
 %   transparent neurons in the living human retina." Proceedings of the
 %   National Academy of Sciences (2017): 201711734.
 %
-
-if showPlots
-    figure
-end
+% Conflicting measurements are found in:
+%
+%   Dacey, Dennis M. "The mosaic of midget ganglion cells in the human
+%   retina." Journal of Neuroscience 13.12 (1993): 5334-5355.
+%
+% Where the midget soma size at 1.5 mm eccentricity is reported as 17.4 or
+% 18.6 microns (for the on and off midgets).
 
 % Loop over the specified meridians
 for mm = 1:length(totalRGC)
@@ -99,7 +109,7 @@ for mm = 1:length(totalRGC)
     % Support in the source data is in degrees of visual field along the
     % temporal retina
     supportDeg = [(1.5+3)/2, (3+4.5)/2, (6+7.5)/2, (8+9.5)/2, (12+13.5)/2];
-    sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315];
+    sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315].*1.15;
 
     % Obtain the fit and save. We find that an exponential does best with
     % the impoverished set of measurements we have
@@ -108,10 +118,14 @@ for mm = 1:length(totalRGC)
         fx,'StartPoint', [0.001 1 0.0115], ...
         'Lower', [0 1 0]);
 
-    % Plot the fit
+    % Plot the fit    
     if showPlots
-        plot(0:0.01:maxEccenDeg,midget(mm).diameter(0:0.01:maxEccenDeg));
+        if mm == 1
+            figure
+        end
+        plot(supportDeg,sizeMM,'x');
         hold on
+        plot(0:0.01:maxEccenDeg,midget(mm).diameter(0:0.01:maxEccenDeg));
         plot(supportDeg,sizeMM,'*');
     end
 

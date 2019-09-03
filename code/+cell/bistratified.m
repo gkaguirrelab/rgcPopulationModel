@@ -10,6 +10,11 @@ function bistratified = bistratified( totalRGC, showPlots )
 %   diameter (in mm) as a function of retinal eccentricity (in degrees).
 %   Requires as input the output of the function cell.totalRGC.
 %
+% Examples:
+%{
+	totalRGC = cell.totalRGC();
+	bistratified = cell.bistratified( totalRGC, true );
+%}
 
 % Handle plotting
 if nargin==1

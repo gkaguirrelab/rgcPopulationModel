@@ -49,21 +49,30 @@ function fVal=modelGCLayerThickness(varargin )
     modelGCLayerThickness()
 %}
 %{
+    % Search across packing density
+    myObj = @(p) modelGCLayerThickness('packingDensity',p,'showPlots',false,'forceRecalculate',false);
+    x0=[0.6122];
+    ub=[0.7];
+    lb=[0.5];
+    [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
+    modelGCLayerThickness('packingDensity',p,'showPlots',true,'forceRecalculate',false);
+%}
+%{
     % Search across model params to fit the data
     myObj = @(p) modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false);
-    x0=[14.9920    0.6998    0.5990    0.9000  0.6122];
-    ub=[15 0.7 0.6 1.0 0.7];
-    lb=[1 0.1 0.2 0.9 0.5];
+    x0=[12, 0.5, 0.41, 0.95 0.7];
+    ub=[12 0.6 0.6 1.0 0.9];
+    lb=[12 0.4 0.2 0.9 0.5];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
-    modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false,'objectiveType','all');
+    modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false);
 %}
 
 %% input parser
 p = inputParser;
 
 % Optional analysis params
-p.addParameter('midgetLinkingFuncParams',[14.9920    0.6998    0.5990    0.9000],@isnumeric); % Best fit to the OCT data
-p.addParameter('packingDensity',0.6199,@isscalar);  % Best fit to the OCT data
+p.addParameter('midgetLinkingFuncParams',[12, 0.5, 0.41, 0.95],@isnumeric); % Best fit to the OCT data
+p.addParameter('packingDensity',0.7,@isscalar);  % Best fit to the OCT data
 p.addParameter('forceRecalculate',true,@islogical);
 p.addParameter('showPlots',true,@islogical);
 p.addParameter('outDir','~/Desktop/KaraCloud_VSS2019_figs',@ischar);
@@ -118,6 +127,36 @@ for mm=1:length(data)
     
 end
 
+if p.Results.showPlots
+    figure
+    supportDeg = 0:0.1:25;
+    for mm = 1:length(data)
+        subplot(2,1,mm)
+        plot(data(mm).supportDeg,data(mm).thickMM,'xk');
+        hold on
+        plot(supportDeg,model(mm).thickMM(supportDeg),'-r');
+        title(model(mm).label)
+    end
+    drawnow
+    
+    % Plot the midget fraction model
+    figure
+    supportDeg = 0:0.1:40;
+    countsDegSqTotal = totalRGC(3).countsDegSq(supportDeg);
+    [~, daceyMidgetFraction, daceyDataSupportPosDegVisual] = calcDaceyMidgetFractionByEccenDegVisual(supportDeg);
+    plot(daceyDataSupportPosDegVisual,daceyMidgetFraction,'or');
+    hold on
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( supportDeg, countsDegSqTotal );
+    plot(supportDeg,midgetFraction,'--r');
+    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( supportDeg, countsDegSqTotal,'linkingFuncParams',p.Results.midgetLinkingFuncParams(1:2),'minMidgetFractionRatio',p.Results.midgetLinkingFuncParams(3),'maxMidgetFractionRatio',p.Results.midgetLinkingFuncParams(4));
+    plot(supportDeg,midgetFraction,'-k');
+    legend({'Dacey','Drasdo','current'},'Location','southwest');
+    xlabel('visual angle [deg]')
+    ylabel('Midget Fraction')
+    ylim([0.4 1]);
+    xlim([0 40]);
+    pbaspect([1 2 1])
+end
 
 end 
 

@@ -22,10 +22,6 @@ if nargin==3
     showPlots = false;
 end
 
-if showPlots
-    figure
-end
-
 % Define a maximum eccentricity of the model
 maxEccenDeg = 50;
 
@@ -54,8 +50,15 @@ for mm = 1:length(totalRGC)
 
     % Plot the fit
     if showPlots
-        plot(supportDeg,parasol(mm).countsDegSq(supportDeg));
+        if mm == 1
+            figure
+        end
+        subplot(ceil(length(totalRGC)/2),ceil(length(totalRGC)/2),mm)
+        plot(supportDeg,totalRGC(mm).countsDegSq(supportDeg),'-k');
         hold on
+        plot(supportDeg,parasol(mm).countsDegSq(supportDeg),'-r');
+        title(totalRGC(mm).label);
+        ylim([0 2500]);
     end
 
 end
@@ -93,7 +96,17 @@ for mm = 1:length(totalRGC)
     parasol(mm).diameter = fit(supportDeg', sizeMM',...
         fx,'StartPoint', [0.001 1 0.018], ...
         'Lower', [0 1 0]);
-    
+
+    % Plot the fit
+    if showPlots
+        if mm == 1
+            figure
+        end
+        plot(supportDeg,sizeMM,'x');
+        hold on
+        plot(0:0.01:maxEccenDeg,parasol(mm).diameter(0:0.01:maxEccenDeg));
+    end
+
 end
 
 
