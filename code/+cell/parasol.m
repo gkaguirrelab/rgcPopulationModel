@@ -71,31 +71,23 @@ end
 %   transparent neurons in the living human retina." Proceedings of the
 %   National Academy of Sciences 114.48 (2017): 12803-12808.
 %
-% The 4th value is taken from Table 1 of:
-%
-%   Dacey, Dennis M. "Morphology of a small-field bistratified ganglion
-%   cell type in the macaque and human retina." Visual neuroscience 10.6
-%   (1993): 1081-1098.
-%
-% Lacking better data, I took the mean human parasol diameter value
-% reported by Dacey and assigned this to 30 degrees of eccentricity.
-%
+
 
 % Loop over the specified meridians
 for mm = 1:length(totalRGC)
 
     % Support in the source data is in degrees of visual field along the
     % temporal retina
-    supportDeg = [6.75 8.75 12.25 30];
-	sizeMM = [0.01863 0.01888 0.02095 0.0233];
+    supportDeg = [6.75 8.75 12.25];
+	sizeMM = [0.01863 0.01888 0.02095];
     
-    % Obtain the fit and save. We find that an exponential does best with
-    % the impoverished set of measurements we have
-    fx = @(a,b,c,x) (a.*x).^b+c;
+    % Obtain the fit and save. Just fit a mean level for now, as we don't
+    % have any data to support otherwise.
+    fx = @(a,x) x.*0+a;
 
     parasol(mm).diameter = fit(supportDeg', sizeMM',...
-        fx,'StartPoint', [0.001 1 0.018], ...
-        'Lower', [0 1 0]);
+        fx,'StartPoint', [0.018], ...
+        'Lower', [0]);
 
     % Plot the fit
     if showPlots

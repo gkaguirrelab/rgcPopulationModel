@@ -1,6 +1,5 @@
 function sizeData = prepareMeanCellSizeData()
 %
-%
 %   Hebel, R., and H. Holländer. "Size and distribution of ganglion cells
 %   in the human retina." Anatomy and embryology 168.1 (1983): 125-136.
 %

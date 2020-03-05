@@ -3,7 +3,7 @@
 		"flavor": "",
 		"hook": "",
 		"importance": "",
-		"localHookTemplate": "config/rgcPopulationModelLocalHook",
+		"localHookTemplate": "config/rgcPopulationModelLocalHookTemplate.m",
 		"printLocalHookOutput": "1",
 		"name": "rgcPopulationModel",
 		"pathPlacement": "append",
@@ -12,6 +12,19 @@
 		"type": "git",
 		"update": "",
 		"url": "https:\/\/github.com\/gkaguirrelab\/rgcPopulationModel.git"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "gkaModelEye",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "include",
+		"update": "",
+		"url": ""
 	},
  	{
 		"flavor": "",
