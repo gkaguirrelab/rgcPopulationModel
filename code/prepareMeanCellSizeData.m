@@ -18,8 +18,18 @@ sizeData(1).supportDeg = supportDeg;
 sizeData(1).diameter = meanSizeMicrons./1000;
 
 sizeData(2).label = 'nasal';
-sizeData(2).angle = 180;
+sizeData(2).angle = 0;
 sizeData(2).supportDeg = supportDeg;
 sizeData(2).diameter = meanSizeMicrons./1000;
+
+sizeData(3).label = 'superior';
+sizeData(3).angle = 90;
+sizeData(3).supportDeg = supportDeg;
+sizeData(3).diameter = meanSizeMicrons./1000;
+
+sizeData(4).label = 'inferior';
+sizeData(4).angle = 270;
+sizeData(4).supportDeg = supportDeg;
+sizeData(4).diameter = meanSizeMicrons./1000;
 
 end

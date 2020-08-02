@@ -61,7 +61,7 @@ function fVal=modelGCLayerThickness(varargin )
     % Search across model params to fit the data
     myObj = @(p) modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false);
     x0=[12, 0.4, 0.5, 0.950, 0.6];
-    ub=[20, 0.6, 0.6, 1.000, 1.0];
+    ub=[30, 0.6, 0.6, 1.000, 1.0];
     lb=[05, 0.2, 0.4, 0.925, 0.4];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
     modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false);
@@ -71,8 +71,8 @@ function fVal=modelGCLayerThickness(varargin )
 p = inputParser;
 
 % Optional analysis params
-p.addParameter('midgetLinkingFuncParams',[12.0290, 0.4320, 0.4, 0.95],@isnumeric); % Best fit to the OCT data
-p.addParameter('packingDensity',0.5905,@isscalar);  % Best fit to the OCT data
+p.addParameter('midgetLinkingFuncParams',[20, 0.5, 0.4, 0.94],@isnumeric); % Best fit to the OCT data
+p.addParameter('packingDensity',0.583,@isscalar);  % Best fit to the OCT data
 p.addParameter('forceRecalculate',true,@islogical);
 p.addParameter('showPlots',true,@islogical);
 p.addParameter('outDir','~/Desktop/KaraCloud_VSS2019_figs',@ischar);
@@ -151,7 +151,7 @@ for mm=1:length(thickData)
     fValThick = fValThick + sqrt(nansum(dataModelThickDif.^2));
     fValSize = fValSize + sqrt(nansum(dataModelSizeDif.^2));
     
-    fVal = fValThick; %+ fValSize;
+    fVal = fValThick + fValSize;
 end
 
 if p.Results.showPlots
@@ -160,7 +160,7 @@ if p.Results.showPlots
     figure
     supportDeg = 0:0.1:25;
     for mm = 1:length(thickData)
-        subplot(2,1,mm)
+        subplot(2,2,mm)
         plot(thickData(mm).supportDeg,thickData(mm).thickMM,'xk');
         hold on
         plot(supportDeg,thickModel(mm).thickMM(supportDeg),'-r');
@@ -172,7 +172,7 @@ if p.Results.showPlots
     figure
     supportDeg = 0:0.1:40;
     for mm = 1:length(sizeData)
-        subplot(2,1,mm)
+        subplot(2,2,mm)
         plot(sizeData(mm).supportDeg,sizeData(mm).diameter,'xk');
         hold on
         plot(supportDeg,sizeModel(mm).diameter(supportDeg),'-r');
