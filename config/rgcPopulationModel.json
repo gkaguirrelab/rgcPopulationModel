@@ -3,12 +3,26 @@
 		"flavor": "",
 		"hook": "",
 		"importance": "",
-		"localHookTemplate": "configuration/rgcPopulationModelLocalHook",
+		"localHookTemplate": "config/rgcPopulationModelLocalHookTemplate.m",
+		"printLocalHookOutput": "1",
 		"name": "rgcPopulationModel",
 		"pathPlacement": "append",
 		"subfolder": "code",
 		"toolboxRoot": "",
 		"type": "git",
+		"update": "",
+		"url": "https:\/\/github.com\/gkaguirrelab\/rgcPopulationModel.git"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "gkaModelEye",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "include",
 		"update": "",
 		"url": ""
 	},
@@ -20,26 +34,10 @@
 		"name": "rgcDisplacementMap",
 		"pathPlacement": "append",
 		"subfolder": "",
-		"toolboxRoot": "",
-		"type": "include",
+		"toolboxRoot": "#",
+		"type": "git",
 		"update": "",
-		"url": ""
-	},
-	{
-		"flavor": "",
-		"hook": "",
-		"importance": "",
-		"localHookTemplate": "",
-		"name": "functional_programming",
-		"pathPlacement": "append",
-		"subfolder": "",
-		"toolboxRoot": "",
-		"type": "webget",
-		"update": "",
-		"url": "https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/39735/versions/4/download/zip"
+		"url": "https:\/\/github.com\/gkaguirrelab\/rgcDisplacementMap.git"
 	}
-
-
-
 ]
 
