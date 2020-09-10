@@ -1,4 +1,4 @@
-function fVal=modelGCLayerThickness(varargin )
+function [fVal, figHandles] = modelGCLayerThickness(varargin )
 % Caclulates GC layer thickness by reference to constituent cell classes
 %
 % Description:
@@ -40,7 +40,7 @@ function fVal=modelGCLayerThickness(varargin )
 %  'forceRecalculate'     - When set to true forces the routine to
 %                           re-calculate the thickness ratio function from
 %                           the source data.
-
+%
 % Outputs:
 %
 % Examples:
@@ -192,11 +192,11 @@ end
 if p.Results.showPlots
     
     % Plot the thickness model fit
-    figure
+    figHandles(1) = figure();
     supportDeg = 0:0.1:25;
     for mm = 1:length(thickData)
         subplot(2,2,mm)
-        plot(thickData(mm).supportDeg,thickData(mm).thickMM,'xk');
+        plot(thickData(mm).supportDeg,thickData(mm).thickMM,'-k');
         hold on
         plot(supportDeg,thickModel(mm).thickMM(supportDeg),'-r');
         title(['GC thickness - ' thickModel(mm).label])
@@ -204,7 +204,7 @@ if p.Results.showPlots
     end
     
     % Plot the mean size model fit
-    figure
+    figHandles(2) = figure();
     supportDeg = 0:0.1:40;
     for mm = 1:length(sizeData)
         subplot(2,2,mm)
@@ -218,7 +218,7 @@ if p.Results.showPlots
     end
     
     % Plot the midget fraction model
-    figure
+    figHandles(3) = figure();
     supportDeg = 0:0.1:40;
     countsDegSqTotal = totalRGC(3).countsDegSq(supportDeg);
     [~, daceyMidgetFraction, daceyDataSupportPosDegVisual] = calcDaceyMidgetFractionByEccenDegVisual(supportDeg);
@@ -239,7 +239,6 @@ if p.Results.showPlots
                 p.Results.midgetLinkingFuncParams(4),...
                 supportDeg);
     end
-
     plot(supportDeg,midgetFraction,'-k');
     legend({'Dacey','Drasdo','current'},'Location','southwest');
     xlabel('visual angle [deg]')
@@ -247,6 +246,22 @@ if p.Results.showPlots
     ylim([0.4 1]);
     xlim([0 40]);
     pbaspect([1 2 1])
+    
+    % Plot the cell densities
+    supportDeg = 0:0.1:25;
+    idx = strcmp([totalRGC(:).label],'temporal');
+    figHandles(4) = figure();
+    cellTypes = {'midget','parasol','bistratified','amacrine'};
+    plotColors = {'-r','-k','-b','-g'};
+    for cc = 1:length(cellTypes)
+        statement = ['yVals = ' cellTypes{cc} '(idx).countsDegSq(supportDeg);'];
+        eval(statement);
+        plot(supportDeg,yVals,plotColors{cc});
+        hold on
+    end
+    ylim([0 2000]);
+    ylabel('Cell density [counts/deg^2]');
+    xlabel('Eccentricity [deg]')
 end
 
 end
