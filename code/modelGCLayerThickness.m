@@ -3,7 +3,7 @@ function fVal=modelGCLayerThickness(varargin )
 %
 % Description:
 %   We aim to create a model of the thickness of the retinal ganglion cell
-%   layer and how it varies with eccentricity, comparing our estimations to
+%   layer and how it varies with eccentricity, comparing our estimates to
 %   reports from histology and OCT scanned images. We will calculate the
 %   thickness of the RGC layer using data from histology on the population
 %   of midget, parasol, and bistratified ganglion cells as well as
@@ -59,32 +59,57 @@ function fVal=modelGCLayerThickness(varargin )
 %}
 %{
     % Search across model params to fit the data
-    myObj = @(p) modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false);
+    % FIXED midget model
+    myObj = @(p) modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false,'midgetModel','fixed');
+    x0=[6.2665,21.9499,0.5,0.9500, 0.6];
+    ub=[10, 30, 0.6, 1.000, 1.0];
+    lb=[1, 10, 0.4, 0.925, 0.4];
+    [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
+    modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false,'midgetModel','fixed');
+%}
+%{
+    % Search across model params to fit the data
+    % PROPORTIONAL midget model
+    myObj = @(p) modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false,'midgetModel','proportional');
     x0=[12, 0.4, 0.5, 0.950, 0.6];
     ub=[30, 0.6, 0.6, 1.000, 1.0];
     lb=[05, 0.2, 0.4, 0.925, 0.4];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
-    modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false);
+    modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false,'midgetModel','proportional');
 %}
+%{
+    % Search across model params to fit the data
+    % FIXED midget model
+    myObj = @(p) modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',false,'forceRecalculate',false,'midgetModel','fixed');
+    x0=[6.2665,21.9499,0.5,0.95, 0.6];
+    ub=[10, 30, 0.5, 1.000, 1.0];
+    lb=[1, 10, 0.4, 0.9, 0.4];
+    [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
+    modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false,'midgetModel','fixed');
+%}
+
 
 %% input parser
 p = inputParser;
 
 % Optional analysis params
-p.addParameter('midgetLinkingFuncParams',[20, 0.5, 0.4, 0.94],@isnumeric); % Best fit to the OCT data
-p.addParameter('packingDensity',0.583,@isscalar);  % Best fit to the OCT data
+%p.addParameter('midgetLinkingFuncParams',[ 12.0890    0.4335   0.5 0.95],@isnumeric); % Values for the midget proportional model
+p.addParameter('midgetLinkingFuncParams',[ 6.2665,21.9499,0.45,0.96],@isnumeric); % Values for the midget fixed model
+p.addParameter('packingDensity',0.6214,@isscalar);  % Best fit to the OCT data
 p.addParameter('forceRecalculate',true,@islogical);
 p.addParameter('showPlots',true,@islogical);
+p.addParameter('meridianSetName','both',@ischar);
+p.addParameter('midgetModel','fixed',@ischar); % Valid values are {'fixed','proportional'}
 p.addParameter('outDir','~/Desktop/KaraCloud_VSS2019_figs',@ischar);
 
 % parse
 p.parse(varargin{:})
 
 % Obtain the ganglion cell thickness data
-thickData = prepareGCThickData();
+thickData = prepareGCThickData(p.Results.meridianSetName);
 
 % Obtain the mean ganglion cell size data
-sizeData = prepareMeanCellSizeData();
+sizeData = prepareMeanCellSizeData(p.Results.meridianSetName);
 
 % Obtain the cell population components from the individual functions
 % This first set are invariant with respect to the midget fraction
@@ -97,7 +122,12 @@ if isempty(amacrine) || p.Results.forceRecalculate
 end
 
 % These vary with the midget fraction linking parameters
-midget = cell.midget(totalRGC, p.Results.midgetLinkingFuncParams);
+switch p.Results.midgetModel
+    case 'proportional'
+        midget = cell.midget_proportional(totalRGC, p.Results.midgetLinkingFuncParams);
+    case 'fixed'
+        midget = cell.midget_fixed(totalRGC, p.Results.midgetLinkingFuncParams);
+end
 parasol = cell.parasol(totalRGC, midget, bistratified);
 
 % An anonymous function for the volume of a sphere given diameter
@@ -108,6 +138,11 @@ sVol = @(d) 4/3*pi*(d./2).^3;
 fValThick = 0;
 fValSize = 0;
 for mm=1:length(thickData)
+    
+    % Confirm that the label matches for the thick and size data
+    if ~strcmp(thickData(mm).label,sizeData(mm).label)
+        error('The data arrays are not index aligned')
+    end
     
     % Prepare this entry of the models
     thickModel(mm).label = thickData(mm).label;
@@ -151,7 +186,7 @@ for mm=1:length(thickData)
     fValThick = fValThick + sqrt(nansum(dataModelThickDif.^2));
     fValSize = fValSize + sqrt(nansum(dataModelSizeDif.^2));
     
-    fVal = fValThick + fValSize;
+    fVal = fValThick; % + fValSize/10;
 end
 
 if p.Results.showPlots
@@ -191,7 +226,20 @@ if p.Results.showPlots
     hold on
     [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( supportDeg, countsDegSqTotal );
     plot(supportDeg,midgetFraction,'--r');
-    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( supportDeg, countsDegSqTotal,'linkingFuncParams',p.Results.midgetLinkingFuncParams(1:2),'minMidgetFractionRatio',p.Results.midgetLinkingFuncParams(3),'maxMidgetFractionRatio',p.Results.midgetLinkingFuncParams(4));
+
+    switch p.Results.midgetModel
+        case 'proportional'
+            [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDacey( supportDeg, countsDegSqTotal,'linkingFuncParams',p.Results.midgetLinkingFuncParams(1:2),'minMidgetFractionRatio',p.Results.midgetLinkingFuncParams(3),'maxMidgetFractionRatio',p.Results.midgetLinkingFuncParams(4));
+        case 'fixed'
+            [~, logisticFunc] = daceyMidgetFractionByEccenDegVisual();
+            midgetFraction = logisticFunc(...
+                p.Results.midgetLinkingFuncParams(1),...
+                p.Results.midgetLinkingFuncParams(2),...
+                p.Results.midgetLinkingFuncParams(3),...
+                p.Results.midgetLinkingFuncParams(4),...
+                supportDeg);
+    end
+
     plot(supportDeg,midgetFraction,'-k');
     legend({'Dacey','Drasdo','current'},'Location','southwest');
     xlabel('visual angle [deg]')

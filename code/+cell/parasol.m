@@ -72,7 +72,6 @@ end
 %   National Academy of Sciences 114.48 (2017): 12803-12808.
 %
 
-
 % Loop over the specified meridians
 for mm = 1:length(totalRGC)
 
@@ -84,7 +83,6 @@ for mm = 1:length(totalRGC)
     % Obtain the fit and save. Just fit a mean level for now, as we don't
     % have any data to support otherwise.
     fx = @(a,x) x.*0+a;
-
     parasol(mm).diameter = fit(supportDeg', sizeMM',...
         fx,'StartPoint', [0.018], ...
         'Lower', [0]);

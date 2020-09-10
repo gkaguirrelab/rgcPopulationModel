@@ -1,4 +1,4 @@
-function midget = midget( totalRGC, midgetLinkingFuncParams, showPlots )
+function midget = midget_fixed( totalRGC, midgetLinkingFuncParams, showPlots )
 % Size and count functions for the midget RGC class
 %
 % Syntax:
@@ -17,7 +17,7 @@ function midget = midget( totalRGC, midgetLinkingFuncParams, showPlots )
 
 % Handle plotting and missing midgetLinkingFuncParams
 if nargin==1
-    midgetLinkingFuncParams = [12, 0.5, 0.41, 0.95];
+    midgetLinkingFuncParams = [6.2665,21.9499,0.4500,0.9500];
     showPlots = false;
 end
 
@@ -25,8 +25,19 @@ if nargin==2
     showPlots = false;
 end
 
-% Define a maximum eccentricity of the model
+% Define a maximum eccentricity and support of the model
 maxEccenDeg = 50;
+supportDeg = 0:0.01:maxEccenDeg;
+
+
+% Obtain the midget fraction logistic function
+[~, logisticFunc] = daceyMidgetFractionByEccenDegVisual();
+midgetFraction = logisticFunc(...
+    midgetLinkingFuncParams(1),...
+    midgetLinkingFuncParams(2),...
+    midgetLinkingFuncParams(3),...
+    midgetLinkingFuncParams(4),...
+    supportDeg);
 
 
 %% Cell counts
@@ -34,7 +45,6 @@ maxEccenDeg = 50;
 % converts the values within totalRGC into the midget fraction
 
 % Define a support vector in visual degrees
-supportDeg = 0:0.01:maxEccenDeg;
 
 % Loop over the specified meridians
 for mm = 1:length(totalRGC)
@@ -43,35 +53,22 @@ for mm = 1:length(totalRGC)
     countsDegSqTotal = totalRGC(mm).countsDegSq(supportDeg);
     
     % Set the optic disc nans to zero
-    countsDegSqTotal(isnan(countsDegSqTotal)) = 0;
+    opticDiscPoints = isnan(countsDegSqTotal);
     
-    % Define a function that returns the midget density, conditioned on the
-    % property of the parameters
-    switch length(midgetLinkingFuncParams)
-        case 1
-            countsDegSq = transformRGCToMidgetRGCDensityDrasdo(supportDeg,countsDegSqTotal);
-        case 2
-            countsDegSq = transformRGCToMidgetRGCDensityDacey(supportDeg,countsDegSqTotal,...
-                'linkingFuncParams',midgetLinkingFuncParams);
-        case 3
-            countsDegSq = transformRGCToMidgetRGCDensityDacey(supportDeg,countsDegSqTotal,...
-                'linkingFuncParams',midgetLinkingFuncParams(1:2),'minMidgetFractionRatio',midgetLinkingFuncParams(3));
-        case 4
-            countsDegSq = transformRGCToMidgetRGCDensityDacey(supportDeg,countsDegSqTotal,...
-                'linkingFuncParams',midgetLinkingFuncParams(1:2),'minMidgetFractionRatio',midgetLinkingFuncParams(3),'maxMidgetFractionRatio',midgetLinkingFuncParams(4));
-    end
+    % Obtain the midget counts
+    countsDegSq = countsDegSqTotal .* midgetFraction;
     
     % Obtain a fit to the cell densities
-    smoothFit = fit(supportDeg', countsDegSq', 'cubicinterp');
-
+    smoothFit = fit(supportDeg(~opticDiscPoints)', countsDegSq(~opticDiscPoints)', 'cubicinterp');
+    
     % Set up this meridian model element
     midget(mm).label = totalRGC(mm).label;
     midget(mm).angle = totalRGC(mm).angle;
     
     % Nan optic disc points and save the anonymous function
-    midget(mm).countsDegSq = @(posDeg) ...        
+    midget(mm).countsDegSq = @(posDeg) ...
         nanOpticDiscPoints(smoothFit(posDeg), posDeg, totalRGC(mm).angle);
-
+    
     % Plot the fit
     if showPlots
         if mm == 1
@@ -83,7 +80,7 @@ for mm = 1:length(totalRGC)
         plot(supportDeg,midget(mm).countsDegSq(supportDeg),'-r');
         title(totalRGC(mm).label);
     end
-
+    
 end
 
 
@@ -105,19 +102,19 @@ end
 
 % Loop over the specified meridians
 for mm = 1:length(totalRGC)
-
+    
     % Support in the source data is in degrees of visual field along the
     % temporal retina
     supportDeg = [(1.5+3)/2, (3+4.5)/2, (6+7.5)/2, (8+9.5)/2, (12+13.5)/2];
-    sizeMM = [0.0115, 0.0113, 0.0114, 0.0118, 0.01315];
+    sizeMM = [0.0113, 0.0113, 0.0114, 0.0118, 0.01315];
 
     % Obtain the fit and save. Just take the mean for now.
     fx = @(a,x) x.*0+a;
     midget(mm).diameter = fit(supportDeg', sizeMM',...
-        fx,'StartPoint', [0.0115], ...
+        fx,'StartPoint', [0.0118], ...
         'Lower', [0]);
-
-    % Plot the fit    
+    
+    % Plot the fit
     if showPlots
         if mm == 1
             figure
@@ -127,7 +124,7 @@ for mm = 1:length(totalRGC)
         plot(0:0.01:maxEccenDeg,midget(mm).diameter(0:0.01:maxEccenDeg));
         plot(supportDeg,sizeMM,'*');
     end
-
+    
 end
 
 end
