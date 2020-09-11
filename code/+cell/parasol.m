@@ -1,4 +1,4 @@
-function parasol = parasol( totalRGC, midget, bistratified, showPlots )
+function parasol = parasol( totalRGC, midget, bistratified, cellSizeSlope, showPlots )
 % Size and count functions for the parasol RGC class
 %
 % Syntax:
@@ -18,7 +18,7 @@ function parasol = parasol( totalRGC, midget, bistratified, showPlots )
 %}
 
 % Handle plotting and missing Params
-if nargin==3
+if nargin==4
     showPlots = false;
 end
 
@@ -47,7 +47,7 @@ for mm = 1:length(totalRGC)
         totalRGC(mm).countsDegSq(x')- ...
         midget(mm).countsDegSq(x') - ...
         bistratified(mm).countsDegSq(x');
-
+    
     % Plot the fit
     if showPlots
         if mm == 1
@@ -60,7 +60,7 @@ for mm = 1:length(totalRGC)
         title(totalRGC(mm).label);
         ylim([0 2500]);
     end
-
+    
 end
 
 
@@ -72,21 +72,26 @@ end
 %   National Academy of Sciences 114.48 (2017): 12803-12808.
 %
 
+% Support in the source data is in degrees of visual field along the
+% temporal retina
+supportDeg = [6.75 8.75 12.25];
+sizeMM = [0.01863 0.01888 0.02095];
+meanSize = mean(sizeMM);
+meanSupport = mean(supportDeg);
+
+% Obtain the fit and save. Just fit a mean level for now, as we don't
+% have any data to support otherwise.
+%     fx = @(a,x) x.*0+a;
+
+myParasolSize = @(x) (meanSize + meanSize.*(x-meanSupport).*cellSizeSlope )';
+
+
 % Loop over the specified meridians
 for mm = 1:length(totalRGC)
-
-    % Support in the source data is in degrees of visual field along the
-    % temporal retina
-    supportDeg = [6.75 8.75 12.25];
-	sizeMM = [0.01863 0.01888 0.02095];
     
-    % Obtain the fit and save. Just fit a mean level for now, as we don't
-    % have any data to support otherwise.
-    fx = @(a,x) x.*0+a;
-    parasol(mm).diameter = fit(supportDeg', sizeMM',...
-        fx,'StartPoint', [0.018], ...
-        'Lower', [0]);
-
+    parasol(mm).diameter = myParasolSize;
+    
+    
     % Plot the fit
     if showPlots
         if mm == 1
@@ -96,7 +101,7 @@ for mm = 1:length(totalRGC)
         hold on
         plot(0:0.01:maxEccenDeg,parasol(mm).diameter(0:0.01:maxEccenDeg));
     end
-
+    
 end
 
 

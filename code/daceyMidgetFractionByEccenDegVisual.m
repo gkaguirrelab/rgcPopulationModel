@@ -28,9 +28,7 @@ function [fitParams, logisticFunc] = daceyMidgetFractionByEccenDegVisual(varargi
 p = inputParser;
 
 % Optional anaysis params
-p.addParameter('minRatio',0.45,@isnumeric);
-p.addParameter('maxRatio',0.95,@isnumeric);
-p.addParameter('logitFitStartPoint',[5, 20],@isnumeric);
+p.addParameter('logitFitStartPoint',[7, 22, 0.45, 0.95],@isnumeric);
 
 % parse
 p.parse(varargin{:})
@@ -40,7 +38,7 @@ p.parse(varargin{:})
 % modeled relationship. Two of the parameters (max and min asymptote) are
 % locked by the passed parameter
 logisticFunc = fittype( @(slope,inflect,minRatio,maxRatio,x) minRatio+(maxRatio-minRatio)./(1+sign(x./inflect).*abs((x./inflect).^slope)), ...
-    'independent','x','dependent','y','problem',{'minRatio','maxRatio'});
+    'independent','x','dependent','y');
 
 % Data taken from Figure 19B of:
 %	Dacey 1993 J Neurosci,
@@ -57,9 +55,7 @@ daceyMidgetFraction = daceyMidgetFraction / 100;
 
 % Fit a logistic function
 logisticFit = fit(daceyDataSupportPosDegVisual',daceyMidgetFraction',logisticFunc, ...
-    'problem',{p.Results.minRatio, p.Results.maxRatio}, ...
-    'StartPoint',p.Results.logitFitStartPoint, ...
-    'Lower',[0,0],'Upper',[100,100] );
+    'StartPoint',p.Results.logitFitStartPoint );
 
 fitParams = [logisticFit.slope, logisticFit.inflect, logisticFit.minRatio, logisticFit.maxRatio];
 

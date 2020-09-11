@@ -1,4 +1,4 @@
-function bistratified = bistratified( totalRGC, showPlots )
+function bistratified = bistratified( totalRGC, cellSizeSlope, showPlots )
 % Size and count functions for the bistratified RGC class
 %
 % Syntax:
@@ -17,7 +17,7 @@ function bistratified = bistratified( totalRGC, showPlots )
 %}
 
 % Handle plotting
-if nargin==1
+if nargin==2
     showPlots = false;
 end
 
@@ -88,8 +88,18 @@ end
 %   cell type in the macaque and human retina." Visual neuroscience 10.6
 %   (1993): 1081-1098.
 %
+
+sizeMM = 0.0189;
+supportDeg = 3;
+meanSize = mean(sizeMM);
+meanSupport = mean(supportDeg);
+
+% Model the size as mean with proportional growth slope 
+myBistratifiedSize = @(x) (meanSize + meanSize.*(x-meanSupport).*cellSizeSlope )';
+
+
 for mm = 1:length(totalRGC)
-    bistratified(mm).diameter = @(x) repmat(0.0189,size(x))';
+    bistratified(mm).diameter = myBistratifiedSize;
 end
 
 

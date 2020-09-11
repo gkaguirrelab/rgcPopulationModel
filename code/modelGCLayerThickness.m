@@ -94,8 +94,9 @@ p = inputParser;
 
 % Optional analysis params
 %p.addParameter('midgetLinkingFuncParams',[ 12.0890    0.4335   0.5 0.95],@isnumeric); % Values for the midget proportional model
-p.addParameter('midgetLinkingFuncParams',[ 6.2665,21.9499,0.45,0.96],@isnumeric); % Values for the midget fixed model
+p.addParameter('midgetLinkingFuncParams',[ 6.8151   21.4511    0.4668    0.9577 ],@isnumeric); % Values for the midget fixed model
 p.addParameter('packingDensity',0.6214,@isscalar);  % Best fit to the OCT data
+p.addParameter('cellSizeSlope',0,@isscalar);  % Best fit to the OCT data
 p.addParameter('forceRecalculate',true,@islogical);
 p.addParameter('showPlots',true,@islogical);
 p.addParameter('meridianSetName','both',@ischar);
@@ -118,17 +119,17 @@ if isempty(amacrine) || p.Results.forceRecalculate
     ipRGC = cell.ipRGC();
     amacrine = cell.amacrine();
     totalRGC = cell.totalRGC();
-    bistratified = cell.bistratified(totalRGC);
+    bistratified = cell.bistratified(totalRGC,p.Results.cellSizeSlope);
 end
 
 % These vary with the midget fraction linking parameters
 switch p.Results.midgetModel
     case 'proportional'
-        midget = cell.midget_proportional(totalRGC, p.Results.midgetLinkingFuncParams);
+        midget = cell.midget_proportional(totalRGC, p.Results.midgetLinkingFuncParams,p.Results.cellSizeSlope);
     case 'fixed'
-        midget = cell.midget_fixed(totalRGC, p.Results.midgetLinkingFuncParams);
+        midget = cell.midget_fixed(totalRGC, p.Results.midgetLinkingFuncParams, p.Results.cellSizeSlope);
 end
-parasol = cell.parasol(totalRGC, midget, bistratified);
+parasol = cell.parasol(totalRGC, midget, bistratified, p.Results.cellSizeSlope);
 
 % An anonymous function for the volume of a sphere given diameter
 sVol = @(d) 4/3*pi*(d./2).^3;
@@ -193,12 +194,32 @@ if p.Results.showPlots
     
     % Plot the thickness model fit
     figHandles(1) = figure();
-    supportDeg = 0:0.1:25;
+    modelSupportDeg = 0:0.1:25;
     for mm = 1:length(thickData)
-        subplot(2,2,mm)
-        plot(thickData(mm).supportDeg,thickData(mm).thickMM,'-k');
+        xVals = thickData(mm).supportDeg;
+        yVals = thickData(mm).thickMM;
+        plotColor = [0.75 0.75 0.75];
+        switch thickData(mm).label
+            case 'temporal'
+                subplot(2,1,1)
+                xVals = -xVals;
+                xValsModel = -modelSupportDeg;
+            case 'nasal'
+                subplot(2,1,1)
+                xValsModel = modelSupportDeg;
+            case 'inferior'
+                subplot(2,1,2)
+                xVals = -xVals;
+                xValsModel = -modelSupportDeg;
+            case 'superior'
+                subplot(2,1,2)
+                xValsModel = modelSupportDeg;
+        end
+        area(xVals,yVals,'FaceColor',plotColor,'EdgeColor','none')
         hold on
-        plot(supportDeg,thickModel(mm).thickMM(supportDeg),'-r');
+        xlim([-25 25]);
+        ylim([0 0.075]);
+        plot(xValsModel,thickModel(mm).thickMM(modelSupportDeg),'-','Color',[211 60 33]./255,'LineWidth',3);
         title(['GC thickness - ' thickModel(mm).label])
         drawnow
     end
@@ -224,8 +245,8 @@ if p.Results.showPlots
     [~, daceyMidgetFraction, daceyDataSupportPosDegVisual] = calcDaceyMidgetFractionByEccenDegVisual(supportDeg);
     plot(daceyDataSupportPosDegVisual,daceyMidgetFraction,'or');
     hold on
-    [ ~, midgetFraction ] = transformRGCToMidgetRGCDensityDrasdo( supportDeg, countsDegSqTotal );
-    plot(supportDeg,midgetFraction,'--r');
+    drasdoMidgetFraction = calcDrasdoMidgetFractionByVisualEccen(supportDeg,0.8928,41.03);
+    plot(supportDeg,drasdoMidgetFraction,'--r');
 
     switch p.Results.midgetModel
         case 'proportional'
