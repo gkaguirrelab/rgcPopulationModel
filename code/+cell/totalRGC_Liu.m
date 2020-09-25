@@ -1,4 +1,4 @@
-function totalRGC = totalRGC(showPlots)
+function totalRGC = totalRGC_Liu(showPlots)
 % Count functions for the sum of all retinal ganglion cells
 %
 % Syntax:
@@ -19,17 +19,14 @@ if nargin==0
     showPlots = false;
 end
 
-
 % The meridians over which the calculation is to be performed
-cardinalMeridianAngles = [0 90 180 270];
-cardinalMeridianNames = {'nasal' 'superior' 'temporal' 'inferior'};
+cardinalMeridianAngles = [0 180];
+cardinalMeridianNames = {'nasal' 'temporal'};
 
 %% Cell counts
-% We call the rgcDisplacementMap functions which have a representation of
-% the Curcio & Allen 1990 RGC density results. The rgcDisplacementMap
-% toolbox is referenced in eccentricity units of degrees visual field,
-% and provides densities in square degrees visual field.
-
+% We call the rgcDisplacementMap functions, passing the measurmements taken
+% from figure 3 of Liu 2017 PNAS
+dataFileName = fullfile(fileparts(mfilename('fullpath')),'liuRawRGCDensity_reportedAverage.mat');
 
 % Loop over the specified meridians
 for mm = 1:length(cardinalMeridianAngles)
@@ -39,21 +36,29 @@ for mm = 1:length(cardinalMeridianAngles)
     totalRGC(mm).angle = cardinalMeridianAngles(mm);
     
     % Obtain a spline fit to the cell densities
-    splineFit = getSplineFitToRGCDensitySqDegVisual(cardinalMeridianAngles(mm));
+    splineFit = getSplineFitToRGCDensitySqDegVisual(cardinalMeridianAngles(mm),...
+        'cardinalMeridianAngles',cardinalMeridianAngles,...
+        'cardinalMeridianNames',cardinalMeridianNames,...
+        'splineKnots',5,...
+        'splineOrder',4,...
+        'rgcDensityDataFileName',dataFileName);
 
     % Nan optic disc points and save the anonymous function
     totalRGC(mm).countsDegSq =  @(posDeg) ...        
         nanOpticDiscPoints(splineFit(posDeg), posDeg, cardinalMeridianAngles(mm));
 
     if showPlots
-        if mm == 1;
+        if mm == 1
             figure
         end
-        plot(0:0.5:50,totalRGC(mm).countsDegSq(0:0.5:50));
+        [rgcDensitySqDegVisual, rgcNativeSupportPosDegVisual] =  ...
+            loadRawRGCDensityByEccen(cardinalMeridianAngles(mm), ...
+            'rgcDensityDataFileName', dataFileName);
+        plot(rgcNativeSupportPosDegVisual,rgcDensitySqDegVisual,'xk')
         hold on
+        plot(0:0.5:50,totalRGC(mm).countsDegSq(0:0.5:50));
     end
     
 end
 
 end
-

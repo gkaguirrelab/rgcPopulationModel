@@ -85,7 +85,7 @@ function [fVal, figHandles] = modelGCLayerThickness(varargin )
     ub=[10, 30, 0.5, 1.000, 1.0];
     lb=[1, 10, 0.4, 0.9, 0.4];
     [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
-    modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',false,'midgetModel','fixed');
+    modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'showPlots',true,'forceRecalculate',true,'midgetModel','fixed');
 %}
 
 
@@ -116,18 +116,19 @@ sizeData = prepareMeanCellSizeData(p.Results.meridianSetName);
 % This first set are invariant with respect to the midget fraction
 persistent amacrine totalRGC bistratified ipRGC
 if isempty(amacrine) || p.Results.forceRecalculate
-    ipRGC = cell.ipRGC();
-    amacrine = cell.amacrine();
-    totalRGC = cell.totalRGC();
-    bistratified = cell.bistratified(totalRGC,p.Results.cellSizeSlope);
+    ipRGC = cell.ipRGC(p.Results.showPlots);
+    amacrine = cell.amacrine(p.Results.showPlots);
+    totalRGC = cell.totalRGC_Curcio(p.Results.showPlots);
+%    totalRGC = cell.totalRGC_Liu(p.Results.showPlots);
+    bistratified = cell.bistratified(totalRGC,p.Results.cellSizeSlope,p.Results.showPlots);
 end
 
 % These vary with the midget fraction linking parameters
 switch p.Results.midgetModel
     case 'proportional'
-        midget = cell.midget_proportional(totalRGC, p.Results.midgetLinkingFuncParams,p.Results.cellSizeSlope);
+        midget = cell.midget_proportional(totalRGC, p.Results.midgetLinkingFuncParams,p.Results.cellSizeSlope,p.Results.showPlots);
     case 'fixed'
-        midget = cell.midget_fixed(totalRGC, p.Results.midgetLinkingFuncParams, p.Results.cellSizeSlope);
+        midget = cell.midget_fixed(totalRGC, p.Results.midgetLinkingFuncParams, p.Results.cellSizeSlope,p.Results.showPlots);
 end
 parasol = cell.parasol(totalRGC, midget, bistratified, p.Results.cellSizeSlope);
 
@@ -187,7 +188,7 @@ for mm=1:length(thickData)
     fValThick = fValThick + sqrt(nansum(dataModelThickDif.^2));
     fValSize = fValSize + sqrt(nansum(dataModelSizeDif.^2));
     
-    fVal = fValThick; % + fValSize/10;
+    fVal = fValThick;% + fValSize/10;
 end
 
 if p.Results.showPlots

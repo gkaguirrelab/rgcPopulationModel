@@ -24,7 +24,7 @@ x0=[1.0000   41.0300    0.0000    0.8928, 0.5336, 0];
 ub=[10, 50, 0.5, 1.000, 1.0, 0];
 lb=[1, 10, 0, 0.7, 0.1, 0];
 [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
-modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'cellSizeSlope',p(6),'showPlots',true,'forceRecalculate',false,'midgetModel','fixed');
+modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'cellSizeSlope',p(6),'showPlots',true,'forceRecalculate',true,'midgetModel','fixed');
 
 % Create a plot of GCL thickness
 figure
