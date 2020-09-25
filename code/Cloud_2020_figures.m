@@ -53,7 +53,7 @@ end
 
 
 % Create a plot of total GC counts
-totalRGC = cell.totalRGC;
+totalRGC = cell.totalRGC_Curcio;
 for ii = 1:4
     xVals = 0:0.1:25;
     yVals = totalRGC(ii).countsDegSq(xVals);
