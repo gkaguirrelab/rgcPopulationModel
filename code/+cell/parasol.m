@@ -1,4 +1,4 @@
-function parasol = parasol( totalRGC, midget, bistratified, cellSizeSlope, showPlots )
+function parasol = parasol( totalRGC, midget, bistratified, cellSizeParams, showPlots )
 % Size and count functions for the parasol RGC class
 %
 % Syntax:
@@ -79,19 +79,14 @@ sizeMM = [0.01863 0.01888 0.02095];
 meanSize = mean(sizeMM);
 meanSupport = mean(supportDeg);
 
-% Obtain the fit and save. Just fit a mean level for now, as we don't
-% have any data to support otherwise.
-%     fx = @(a,x) x.*0+a;
-
-myParasolSize = @(x) (meanSize + meanSize.*(x-meanSupport).*cellSizeSlope )';
-
+% Model the size as mean with proportional growth slope
+myCellSize = @(x) (meanSize + meanSize.*((x-meanSupport).*cellSizeParams(1)+cellSizeParams(2)) )';
 
 % Loop over the specified meridians
 for mm = 1:length(totalRGC)
     
-    parasol(mm).diameter = myParasolSize;
-    
-    
+    parasol(mm).diameter = myCellSize;
+        
     % Plot the fit
     if showPlots
         if mm == 1
@@ -100,9 +95,10 @@ for mm = 1:length(totalRGC)
         plot(supportDeg,sizeMM,'x');
         hold on
         plot(0:0.01:maxEccenDeg,parasol(mm).diameter(0:0.01:maxEccenDeg));
+        title('modeled parasol soma size')
+        drawnow
     end
-    
-end
+ end
 
 
 end

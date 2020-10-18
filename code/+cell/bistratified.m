@@ -1,4 +1,4 @@
-function bistratified = bistratified( totalRGC, cellSizeSlope, showPlots )
+function bistratified = bistratified( totalRGC, cellSizeParams, showPlots )
 % Size and count functions for the bistratified RGC class
 %
 % Syntax:
@@ -94,12 +94,12 @@ supportDeg = 3;
 meanSize = mean(sizeMM);
 meanSupport = mean(supportDeg);
 
-% Model the size as mean with proportional growth slope 
-myBistratifiedSize = @(x) (meanSize + meanSize.*(x-meanSupport).*cellSizeSlope )';
+% Model the size as mean with proportional growth slope
+myCellSize = @(x) (meanSize + meanSize.*((x-meanSupport).*cellSizeParams(1)+cellSizeParams(2)) )';
 
 
 for mm = 1:length(totalRGC)
-    bistratified(mm).diameter = myBistratifiedSize;
+    bistratified(mm).diameter = myCellSize;
 end
 
 

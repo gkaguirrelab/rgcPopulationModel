@@ -1,4 +1,4 @@
-function totalRGC = totalRGC_Curcio(showPlots)
+function totalRGC = totalRGC_Curcio(supportShift,showPlots)
 % Count functions for the sum of all retinal ganglion cells
 %
 % Syntax:
@@ -41,9 +41,11 @@ for mm = 1:length(cardinalMeridianAngles)
     % Obtain a spline fit to the cell densities
     splineFit = getSplineFitToRGCDensitySqDegVisual(cardinalMeridianAngles(mm));
 
-    % Nan optic disc points and save the anonymous function
+    % Nan optic disc points and save the anonymous function. Also implement
+    % here the supportShift, which allows for a small, fixed shift of the
+    % totalRGC profile to better fit the empirical thickness data.
     totalRGC(mm).countsDegSq =  @(posDeg) ...        
-        nanOpticDiscPoints(splineFit(posDeg), posDeg, cardinalMeridianAngles(mm));
+        nanOpticDiscPoints(splineFit(posDeg+supportShift), posDeg+supportShift, cardinalMeridianAngles(mm));
 
     if showPlots
         if mm == 1

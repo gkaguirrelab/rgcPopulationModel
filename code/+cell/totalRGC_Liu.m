@@ -43,9 +43,13 @@ for mm = 1:length(cardinalMeridianAngles)
         'splineOrder',4,...
         'rgcDensityDataFileName',dataFileName);
 
-    % Nan optic disc points and save the anonymous function
-    totalRGC(mm).countsDegSq =  @(posDeg) ...        
-        nanOpticDiscPoints(splineFit(posDeg), posDeg, cardinalMeridianAngles(mm));
+    % Nan optic disc points and those points where the spline fit returns a
+    % value of zero (i.e., points where we have not data regarding RGC
+    % density)
+    totalRGC(mm).countsDegSq =  @(posDeg) ...
+        nanZeros(...
+        nanOpticDiscPoints(splineFit(posDeg), posDeg, cardinalMeridianAngles(mm)) ...
+        );
 
     if showPlots
         if mm == 1
@@ -61,4 +65,8 @@ for mm = 1:length(cardinalMeridianAngles)
     
 end
 
+end
+
+function y = nanZeros(y)
+    y(y==0) = nan;
 end

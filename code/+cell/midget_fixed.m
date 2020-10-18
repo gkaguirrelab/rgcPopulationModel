@@ -1,4 +1,4 @@
-function midget = midget_fixed( totalRGC, midgetLinkingFuncParams, cellSizeSlope, showPlots )
+function midget = midget_fixed( totalRGC, midgetLinkingFuncParams, cellSizeParams, showPlots )
 % Size and count functions for the midget RGC class
 %
 % Syntax:
@@ -100,20 +100,20 @@ end
 % Where the midget soma size at 1.5 mm eccentricity is reported as 17.4 or
 % 18.6 microns (for the on and off midgets).
 
-    % Support in the source data is in degrees of visual field along the
-    % temporal retina
-    supportDeg = [(1.5+3)/2, (3+4.5)/2, (6+7.5)/2, (8+9.5)/2, (12+13.5)/2];
-    sizeMM = [0.0113, 0.0113, 0.0114, 0.0118, 0.01315];
-    meanSize = mean(sizeMM);
+% Support in the source data is in degrees of visual field along the
+% temporal retina
+supportDeg = [(1.5+3)/2, (3+4.5)/2, (6+7.5)/2, (8+9.5)/2, (12+13.5)/2];
+sizeMM = [0.0113, 0.0113, 0.0114, 0.0118, 0.01315];
+meanSize = mean(sizeMM);
 meanSupport = mean(supportDeg);
 
-% Model the size as mean with proportional growth slope 
-myMidgetSize = @(x) (meanSize + meanSize.*(x-meanSupport).*cellSizeSlope )';
+% Model the size as mean with proportional growth slope
+myCellSize = @(x) (meanSize + meanSize.*((x-meanSupport).*cellSizeParams(1)+cellSizeParams(2)) )';
 
 % Loop over the specified meridians
 for mm = 1:length(totalRGC)
     
-    midget(mm).diameter = myMidgetSize;
+    midget(mm).diameter = myCellSize;
     
     % Plot the fit
     if showPlots
@@ -123,7 +123,7 @@ for mm = 1:length(totalRGC)
         plot(supportDeg,sizeMM,'x');
         hold on
         plot(0:0.01:maxEccenDeg,midget(mm).diameter(0:0.01:maxEccenDeg));
-        plot(supportDeg,sizeMM,'*');
+        title('modeled midget soma size')
     end
     
 end
