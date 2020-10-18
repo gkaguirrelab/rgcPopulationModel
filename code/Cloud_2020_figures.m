@@ -39,8 +39,8 @@ args = {'midgetModel','fixed'};
 modelGCLayerThickness('showPlots',false,'forceRecalculate',true,args{:});
 myObj = @(p) modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'cellSizeParams',p(6:7), 'showPlots',false,'forceRecalculate',false,args{:});
 x0=[6.8151   21.4511    0.4668    0.9577  0.5336 0, 0];
-ub=[10, 50, 0.5, 1.000, 0.8, 0, 0];
-lb=[1, 10, 0.4, 0.9, 0.1, 0, 0];
+ub=[10, 50, 0.5, 1.000, 0.8, 1, 1];
+lb=[1, 10, 0.4, 0.9, 0.1, 0, -1];
 [p,fval]=fmincon(myObj,x0,[],[],[],[],lb,ub)
 modelGCLayerThickness('midgetLinkingFuncParams',p(1:4),'packingDensity',p(5),'cellSizeParams',p(6:7),'showPlots',true,'forceRecalculate',true,args{:});
 
