@@ -1,4 +1,4 @@
-function amacrine = amacrine(showPlots)
+function amacrine = amacrine(cellSizeParams, showPlots)
 % Size and count functions for the amacrine cell class
 %
 % Syntax:
@@ -42,6 +42,10 @@ for mm = 1:length(cardinalMeridianAngles)
     supportMM = [0, 0.11, 0.23, 0.4, 0.65, 0.86, 1.45, 2.46, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.6, 12.6, 13.6, 14.6, 15.6, 16.6, 17.7, 18.65, 19.65];
     countsMMSq = [73, 124, 317, 542, 689, 813, 1052, 1112, 1159, 1187, 1146, 1069, 992, 942, 888, 848, 798, 767, 731, 699, 677, 650, 642, 652, 676];
 
+    % Hack the data to set the value at zero equal to zero, so that this
+    % will accord with the thickness measures
+    countsMMSq(supportMM==0)=0;
+    
     % Convert retinal mm to visual degrees
     supportDeg = convert_mmRetina_to_degVisual(supportMM, cardinalMeridianAngles(mm));
     countsDegSq = countsMMSq .* calc_mmSqRetina_per_degSqVisual(supportDeg, cardinalMeridianAngles(mm));
@@ -64,6 +68,7 @@ for mm = 1:length(cardinalMeridianAngles)
         plot(0:0.5:50,amacrine(mm).countsDegSq(0:0.5:50));
         hold on
         plot(supportDeg,countsDegSq,'*');
+        title('amacrine cell density by meridian');
     end
     
 end
@@ -82,15 +87,20 @@ end
 %
 for mm = 1:length(cardinalMeridianAngles)
 
-    % Data from Dacet 1990, Figure 5B, used for all meridians
+    % Data from Dacey 1990, Figure 5B, used for all meridians
 	supportMM = [0, 0.87, 1.68, 2.80, 3.76, 4.74, 5.86, 6.68, 7.36, 8.19, 8.71, 9.45, 9.97, 10.67, 11.45, 12.39, 13.47, 14.5, 15.62, 16.54, 17.82];
 	sizeMM = [.01259, .01266, .01274, .01286, .01303, .0132, .01324, .01332, .01336, .01335, .01353, .01361, .01365, .01373, .01381, .01394, .01402, .01419, .01423, .01439, .01452];
+    meanSize = mean(sizeMM);
 
     % Convert retinal mm to visual degrees
     supportDeg = convert_mmRetina_to_degVisual(supportMM,cardinalMeridianAngles(mm));
-    
+    meanSupport = mean(supportDeg);
+
+    % Model the size as mean with proportional growth slope
+    myCellSize = @(x) (meanSize + meanSize.*((x-meanSupport).*cellSizeParams(1)+cellSizeParams(2)) )';
+
     % Obtain the fit and save
-    amacrine(mm).diameter = fit(supportDeg',sizeMM','poly3');
+    amacrine(mm).diameter = myCellSize;
     
     if showPlots
         if mm == 1
@@ -99,6 +109,7 @@ for mm = 1:length(cardinalMeridianAngles)
         plot(supportDeg,sizeMM,'*');
         hold on
         plot(0:0.5:70,amacrine(mm).diameter(0:0.5:70));
+        title('amacrine soma size by eccentricity');
     end
     
 end

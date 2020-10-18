@@ -119,10 +119,9 @@ sizeData = prepareMeanCellSizeData_Liu(p.Results.meridianSetName);
 % Obtain the cell population components from the individual functions
 % This first set are invariant with respect to the midget fraction and the
 % cellSizeParams
-persistent amacrine totalRGC ipRGC
-if isempty(amacrine) || p.Results.forceRecalculate
+persistent totalRGC ipRGC
+if isempty(totalRGC) || p.Results.forceRecalculate
     ipRGC = cell.ipRGC(p.Results.showInputPlots);
-    amacrine = cell.amacrine(p.Results.showInputPlots);
     switch p.Results.totalRGCSource
         case 'Curcio'
             totalRGC = cell.totalRGC_Curcio(p.Results.totalRGCSupportShift,p.Results.showInputPlots);
@@ -140,6 +139,7 @@ switch p.Results.midgetModel
 end
 
 % These vary with the cellSizeParams, so must be re-calculated
+amacrine = cell.amacrine(p.Results.cellSizeParams,p.Results.showInputPlots);
 bistratified = cell.bistratified(totalRGC,p.Results.cellSizeParams,p.Results.showInputPlots);
 parasol = cell.parasol(totalRGC, midget,bistratified,p.Results.cellSizeParams, p.Results.showInputPlots);
 
@@ -243,7 +243,7 @@ if p.Results.showPlots
     
     % Plot the mean size model fit
     figHandles(2) = figure();
-    supportDeg = 0:0.1:40;
+    supportDeg = 1:0.1:40;
     for mm = 1:length(sizeData)
         subplot(2,2,mm)
         plot(sizeData(mm).supportDeg,sizeData(mm).diameter,'xk');

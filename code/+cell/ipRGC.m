@@ -49,7 +49,7 @@ for mm = 1:length(cardinalMeridianAngles)
     countsDegSq = countsMMSq .* calc_mmSqRetina_per_degSqVisual(supportDeg, cardinalMeridianAngles(mm));
     
     % Obtain a fit to the cell densities
-    splineFit = fit(supportDeg', countsDegSq', 'cubicinterp');
+    splineFit = fit(supportDeg', countsDegSq', 'smoothingspline');
     
     % Set up this meridian model element
     ipRGC(mm).label = cardinalMeridianNames(mm);
@@ -63,6 +63,7 @@ for mm = 1:length(cardinalMeridianAngles)
         plot(0:0.5:50,ipRGC(mm).countsDegSq(0:0.5:50));
         hold on
         plot(supportDeg,countsDegSq,'*');
+        title('ipRGC cell density by meridian');
     end
     
 end
