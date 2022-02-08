@@ -16,6 +16,7 @@ function totalRGC = totalRGC_Curcio(supportShift,showPlots)
 
 % Handle plotting
 if nargin==0
+    supportShift = 0;
     showPlots = false;
 end
 

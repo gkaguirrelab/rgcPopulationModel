@@ -17,6 +17,11 @@ function bistratified = bistratified( totalRGC, cellSizeParams, showPlots )
 %}
 
 % Handle plotting
+if nargin==1
+    cellSizeParams = [0, 0];
+    showPlots = false;
+end
+
 if nargin==2
     showPlots = false;
 end

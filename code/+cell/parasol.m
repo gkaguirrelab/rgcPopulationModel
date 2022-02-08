@@ -11,10 +11,10 @@ function parasol = parasol( totalRGC, midget, bistratified, cellSizeParams, show
 %
 % Examples:
 %{
-    totalRGC = cell.totalRGC();
-    midget = cell.midget( totalRGC );
+    totalRGC = cell.totalRGC_Curcio();
+    midget = cell.midget_fixed( totalRGC );
     bistratified = cell.bistratified(totalRGC);
-    parasol = cell.parasol( totalRGC, midget, bistratified, true );
+    parasol = cell.parasol( totalRGC, midget, bistratified, [0,0], true );
 %}
 
 % Handle plotting and missing Params
@@ -54,11 +54,13 @@ for mm = 1:length(totalRGC)
             figure
         end
         subplot(ceil(length(totalRGC)/2),ceil(length(totalRGC)/2),mm)
-        plot(supportDeg,totalRGC(mm).countsDegSq(supportDeg),'-k');
+        plot(supportDeg,totalRGC(mm).countsDegSq(supportDeg),'--k');
         hold on
-        plot(supportDeg,parasol(mm).countsDegSq(supportDeg),'-r');
+        plot(supportDeg,parasol(mm).countsDegSq(supportDeg),'-k');
+        plot(supportDeg,midget(mm).countsDegSq(supportDeg),'-r');
         title(totalRGC(mm).label);
         ylim([0 2500]);
+        drawnow
     end
     
 end
